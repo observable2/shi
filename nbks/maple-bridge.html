@@ -1,0 +1,59 @@
+<!doctype html>
+<notebook theme="midnight">
+  <title>Maple Bridge</title>
+  <script id="2" type="text/markdown" hidden="">
+    # Maple Bridge
+  </script>
+  <script id="1" type="text/html">
+    <style>
+      #frame {
+        font-size: 2vw;
+      }
+      #frame img {
+        top: -1vw;
+        left: -2vw;
+        height: 100%;
+        width: auto;
+      }
+      #field {
+        top: 3.3vw;
+        left: 15vw;
+        font-optical-sizing: none;
+      }
+      #byline {
+        color: lightgrey;
+      }
+    </style>
+    <div id="frame">
+      <img id="calligraphy" class="zi" alt="">
+      <div id="field"></div>
+    </div>
+    <div id="byline">
+      <span id="bytext"><cite>Maple Bridge Mooring at Night</cite> by Zhang Ji (fl. 753), translated by John for 2025/26.<br>Original calligraphy by and courtesy of Zheng Zhong.</span>
+    </div>
+  </script>
+  <script id="3" type="module">
+    // Wait for the DOM to be ready before querying elements
+    await new Promise(resolve => requestAnimationFrame(resolve));
+
+    const { config } = await import("./data/maple-bridge/config.js");
+    // --- DEBUG configuration
+    // config.startingPoint = 1; // DEBUG: start at a later paragraph
+    // config.running = false; // DEBUG
+    const fieldElem = document.getElementById("field");
+    document.getElementById("frame").style.fontWeight = config.fontWeight;
+    document.getElementById("calligraphy").src = await FileAttachment("./data/maple-bridge/ZhengZhong_shu_FengQiaoYeBo_ZhangJi.jpg").url();
+    // --- preprocessing ---
+    const spels = new Map(await FileAttachment("./data/maple-bridge/spels.json").json());
+    fieldElem.innerHTML = Array.from(spels.values())
+      .map((spel) => spel.html)
+      .join("");
+    const paras = await FileAttachment("./data/maple-bridge/paras.json").json();
+    // scores are in milliseconds (converted from the Framework originals' hundredths of a second)
+    const scores = await FileAttachment("./data/maple-bridge/scores.json").json();
+
+    const { play, splitIntoChars } = await import("scoringthespeltair");
+    if (config.charFades) splitIntoChars(fieldElem);
+    if (config.running) play(config, fieldElem, spels, paras, scores);
+  </script>
+</notebook>

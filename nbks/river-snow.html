@@ -1,0 +1,46 @@
+<!doctype html>
+<notebook theme="midnight">
+  <title>River Snow</title>
+  <script id="2" type="text/markdown" hidden="">
+    # River Snow
+  </script>
+  <script id="1" type="text/html">
+    <style>
+      #field {
+        top: 2.5vw;
+        left: 33vw;
+      }
+    </style>
+    <div id="frame">
+      <img id="calligraphy" alt="">
+      <div id="field"></div>
+    </div>
+    <div id="byline">
+      <span id="bytext"><cite>River Snow</cite> by Liu Zongyuan (773-819), translated by John for 2020/21.<br>Contemporary calligraphy from the book <cite>Tangshi Shufa</cite>.</span>
+    </div>
+  </script>
+  <script id="3" type="module">
+    // Wait for the DOM to be ready before querying elements
+    await new Promise(resolve => requestAnimationFrame(resolve));
+
+    const { config } = await import("./data/river-snow/config.js");
+    // --- DEBUG configuration
+    // config.startingPoint = 1; // DEBUG: start at a later paragraph
+    // config.running = false; // DEBUG
+    const fieldElem = document.getElementById("field");
+    document.getElementById("frame").style.fontWeight = config.fontWeight;
+    document.getElementById("calligraphy").src = await FileAttachment("./data/river-snow/riverSnow.jpg").url();
+    // --- preprocessing ---
+    const spels = new Map(await FileAttachment("./data/river-snow/spels.json").json());
+    fieldElem.innerHTML = Array.from(spels.values())
+      .map((spel) => spel.html)
+      .join("");
+    const paras = await FileAttachment("./data/river-snow/paras.json").json();
+    // scores are in milliseconds (converted from the Framework originals' hundredths of a second)
+    const scores = await FileAttachment("./data/river-snow/scores.json").json();
+
+    const { play, splitIntoChars } = await import("scoringthespeltair");
+    if (config.charFades) splitIntoChars(fieldElem);
+    if (config.running) play(config, fieldElem, spels, paras, scores);
+  </script>
+</notebook>

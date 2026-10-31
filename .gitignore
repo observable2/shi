@@ -1,0 +1,10 @@
+*.log
+npm-debug.log*
+.DS_Store
+dist/
+node_modules/
+.vscode/
+CLAUDE.md
+
+# original recordings and score sources, not built
+raw/

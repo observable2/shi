@@ -1,0 +1,13 @@
+{
+  "name": "shi",
+  "version": "0.0.1",
+  "private": true,
+  "dependencies": {
+    "@observablehq/notebook-kit": "latest",
+    "scoringthespeltair": "github:observable2/scoringthespeltair"
+  },
+  "scripts": {
+    "preview": "notebooks preview --root nbks --template nbks/custom.tmpl",
+    "build": "notebooks build --root nbks --template nbks/custom.tmpl --out ../dist -- nbks/*.html"
+  }
+}

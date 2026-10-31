@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style type="text/css">
+      @import url("observable:styles/index.css");
+      @import url("@fontsource-variable/inter/wght.css");
+      @import url("@fontsource-variable/inter/wght-italic.css");
+      @import url("@fontsource-variable/source-serif-4/wght.css");
+      @import url("@fontsource-variable/source-serif-4/wght-italic.css");
+      @import url("@fontsource-variable/spline-sans-mono/wght.css");
+      @import url("@fontsource-variable/spline-sans-mono/wght-italic.css");
+      /* the poems' type: Source Serif 4 with its optical-size axis (family "Source Serif 4 Variable") */
+      @import url("@fontsource-variable/source-serif-4/opsz.css");
+      @import url("@fontsource-variable/source-serif-4/opsz-italic.css");
+      /* padding and borders count inside an element's width/height; without this, width:100% plus padding/border overflows its container */
+      *, *::before, *::after {
+        box-sizing: border-box;
+      }
+      /* force no top margin on every element except the html tag, which keeps a small margin (set below) */
+      *:not(html) {
+        margin-top:0 !important;
+      }
+      /* every cell's wrapper div gets Observable's default cell margin (17px 0); this project never relies on that spacing (each page has at most one visible content cell), so it's collapsed everywhere rather than just on empty/hidden cells, which is fragile (:empty only matches a cell with zero child nodes, including no whitespace text nodes) */
+      .observablehq--cell {
+        margin: 0;
+      }
+      /* edit your backgound colors
+        these colors are intended to show you where the elements are
+        and how to configure them */
+      html {
+        background-color: black;
+        margin:0;
+        padding:0; /* change this to override template default */
+        border:0;
+      }
+      /* and edit this for body properties */
+      body {
+        background-color: black;
+        color: floralwhite;
+        cursor: none;
+        max-width: none;
+        margin:0;
+        padding:0; /* change this to override template default */
+        border:0;
+      }
+      main {
+        /* background-color: red; */
+        max-width: none;
+        margin:0;
+        padding:0; /* change this to override template default */
+        border:0;
+      }
+      /* --- the poems (maple-bridge, river-snow, treading-void) ---
+         Each poem page is a #frame holding an optional calligraphy <img> and the #field the spels are
+         placed in (spels carry their own left/top in vw, measured at the font weight in the poem's
+         config). A poem page overrides only what differs (field position, image, font size) in a
+         <style> in its own html cell. The engine toggles .visible (and, per score, e.g. .glow). */
+      #frame {
+        position: relative;
+        padding: 2vw 5vw;
+        height: 45vw;
+        font-family: var(--serif);
+        font-size: 2.5vw;
+        font-variant-ligatures: no-common-ligatures;
+        font-optical-sizing: auto;
+        font-style: normal;
+        line-height: 1.8;
+      }
+      #frame img {
+        position: absolute;
+        border: none;
+        width: 25vw;
+      }
+      #frame img.zi {
+        filter: invert(1);
+      }
+      #field {
+        position: absolute;
+        top: 7vw;
+        left: 30vw;
+        user-select: none;
+        -webkit-user-select: none; /* Safari */
+        transition: opacity 2.5s ease-in-out;
+      }
+      #field em {
+        font-style: normal;
+        transition: color .7s ease-in-out, text-shadow .7s ease-in-out;
+      }
+      #field em.visible {
+        color: white;
+      }
+      .spel {
+        position: absolute;
+        opacity: 0;
+        transition: all 1.5s ease-in-out;
+      }
+      .spel.visible {
+        opacity: 1;
+      }
+      /* with config.charFades each spel is split into .char spans, which carry the fade */
+      .char {
+        opacity: 0;
+        transition: all 1.3s ease-in-out;
+      }
+      .char.visible {
+        opacity: 1;
+      }
+      .glow {
+        color: lemonchiffon;
+        text-shadow: 0 -0.3ch 0.5ch white, 0 0.3ch 0.5ch white,
+          0 -0.6ch 1ch white, 0 0.6ch 1ch white;
+      }
+      /* the credits: hidden until hovered, or until the cycle's credits pause */
+      #byline {
+        color: floralwhite;
+        font-size: 1.6vw;
+        line-height: 1.1;
+        padding: 0 10vw 2vw;
+        text-align: center;
+        z-index: 10;
+        cursor: pointer;
+        opacity: 0;
+        transition: opacity .7s ease-in-out;
+      }
+      #byline:hover {
+        opacity: 1;
+      }
+      #byline a {
+        color: floralwhite;
+        text-decoration: none;
+      }
+      #byline a:hover {
+        color: lightgray;
+      }
+    </style>
+  </head>
+  <body>
+    <main></main>
+  </body>
+</html>
