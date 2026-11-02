@@ -1,8 +1,8 @@
 # shi
 
 Animated translations of classical Chinese quatrains, by John Cayley: *Maple Bridge*, *River Snow* and
-*Treading the Void*. An Observable Notebook Kit project, converted from the Observable Framework site
-`framework/shi` ("Quatrains and More"). Each poem's playback uses the shared engine
+*Treading the Void*. An Observable Notebook Kit project, converted from an Observable Framework site
+`framework/shi` Each poem's playback uses the shared engine
 [observable2/scoringthespeltair](https://github.com/observable2/scoringthespeltair); the poem-local
 `play()` loops of the Framework site are gone.
 
