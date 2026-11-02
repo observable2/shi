@@ -56,31 +56,48 @@
       /* --- the poems (maple-bridge, river-snow, treading-void) ---
          Each poem page is a #frame holding an optional calligraphy <img> and the #field the spels are
          placed in (spels carry their own left/top in vw, measured at the font weight in the poem's
-         config). A poem page overrides only what differs (field position, image, font size) in a
-         <style> in its own html cell. The engine toggles .visible (and, per score, e.g. .glow). */
+         config). The defaults here are minimal: #frame only claims the space, the img only sits in it,
+         and all text defaults live on #field. A poem page overrides only what differs (field position,
+         image size/position, field font size) in a <style> in its own html cell. The engine toggles
+         .visible (and, per score, e.g. .glow). */
+      /* the frame takes the whole viewport width left by the elements above it, and the full viewport height,
+         as two columns: the image (sized by its own aspect ratio) and the field (the rest). A poem sets
+         padding/column-gap on the frame to space them (not margin: margin-top is forced to 0 above). */
       #frame {
+        display: grid;
+        grid-template-columns: auto 1fr;
+        grid-template-rows: minmax(0, 1fr);
+        padding: 3vw;
+        column-gap: 3vw;
+        width: 100%;
+        height: 100vh;
+        height: 100dvh;
+      }
+      /* first column: as tall as the frame's content box, as wide as its aspect ratio gives */
+      #frame img {
+        grid-column: 1;
+        align-self: start; /* don't stretch the row's height when a poem sets height:auto */
+        display: block;
+        height: auto;
+        width: 25vw;
+        border: none;
+      }
+      #frame img.zi {
+        filter: invert(1);
+      }
+      /* the field is the second column, the textual animation: it is the positioning context (its top-left
+         is the origin of the spels' own left/top; a poem may nudge it with top/left); all text defaults are here */
+      #field {
+        grid-column: 2;
         position: relative;
-        padding: 2vw 5vw;
-        height: 45vw;
+        top: 1vw;
+        min-width: 0;
         font-family: var(--serif);
         font-size: 2.5vw;
         font-variant-ligatures: no-common-ligatures;
         font-optical-sizing: auto;
         font-style: normal;
         line-height: 1.8;
-      }
-      #frame img {
-        position: absolute;
-        border: none;
-        width: 25vw;
-      }
-      #frame img.zi {
-        filter: invert(1);
-      }
-      #field {
-        position: absolute;
-        top: 7vw;
-        left: 30vw;
         user-select: none;
         -webkit-user-select: none; /* Safari */
         transition: opacity 2.5s ease-in-out;
@@ -115,6 +132,10 @@
       }
       /* the credits: hidden until hovered, or until the cycle's credits pause */
       #byline {
+        position: fixed;
+        left: 0;
+        right: 0;
+        bottom: 0;
         color: floralwhite;
         font-size: 1.6vw;
         line-height: 1.1;

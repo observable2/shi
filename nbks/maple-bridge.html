@@ -6,18 +6,20 @@
   </script>
   <script id="1" type="text/html">
     <style>
+      /* spels.json positions are in vw from the field's left edge, so that edge must not move with the window:
+         a fixed first column (3vw padding + 18vw = field origin at 21vw) rather than one sized by the image.
+         The image is as tall as the frame's content box, its width follows its aspect ratio, and it may
+         overlap the field's first few vw on wide windows, as it did before. */
       #frame {
-        font-size: 2vw;
+        grid-template-columns: 17vw 1fr;
+        column-gap: 0;
       }
       #frame img {
-        top: -1vw;
-        left: -2vw;
-        height: 100%;
-        width: auto;
+        width: 16vw;
       }
       #field {
-        top: 3.3vw;
-        left: 15vw;
+        top: 3vw;
+        font-size: 2vw;
         font-optical-sizing: none;
       }
       #byline {
