@@ -60,15 +60,12 @@ Not brought over: `you.md` (an unfinished experiment, not in `nbks/`) and the un
 
 ## Working with the engine
 
-`package.json` depends on `github:observable2/scoringthespeltair` (no tag); `package-lock.json` pins the
-commit, so nothing updates until you ask: commit and push the engine, then `npm update scoringthespeltair`
-here and commit the lockfile.
-
-**This project needs the engine changes of 2026-10-31** (engine v0.4.0: `cycleScores`, `scoreSettings`,
-`splitIntoChars`), which are not on GitHub yet. Until they are pushed and the lock updated, the deployed
-build would fail, because the pinned commit predates them. In the shared workspace
-(`scored-air/package.json`), `npm install` puts a copy of the pushed engine in `shi/node_modules`; delete
-`shi/node_modules` and the local engine folder is used instead.
+`package.json` depends on `github:observable2/scoringthespeltair#vX.Y.Z`, a tagged release;
+`package-lock.json` pins the commit, so nothing updates until you bump the tag. To bump, push the engine tag,
+then run `node node_modules/scoringthespeltair/scripts/bump.js vX.Y.Z` in this folder (`--dry` previews).
+Do not use plain `npm install` or `npm update` for this: inside the `scored-air` workspace they update the
+shared root lockfile, not this project's own, which is the one the deploy builds from.
+Commit `package.json` and `package-lock.json`.
 
 ## Checks
 
