@@ -6,10 +6,13 @@
   </script>
   <script id="1" type="text/html">
     <style>
-      /* spels.json positions are in vw from the field's left edge, so that edge must not move with the window:
-         a fixed first column (3vw padding + 18vw = field origin at 21vw) rather than one sized by the image.
-         The image is as tall as the frame's content box, its width follows its aspect ratio, and it may
-         overlap the field's first few vw on wide windows, as it did before. */
+      /* spels.json positions are in vw from the field's left edge,
+         so that edge must not move with the window: a fixed first
+         column (3vw padding + 17vw = field origin at 20vw) rather
+         than one sized by the image. The image is as tall as the
+         frame's content box, its width follows its aspect ratio,
+         and it may overlap the field's first few vw on wide
+         windows, as it did before. */
       #frame {
         grid-template-columns: 17vw 1fr;
         column-gap: 0;
@@ -35,7 +38,7 @@
     </div>
   </script>
   <script id="3" type="module">
-    // Wait for the DOM to be ready before querying elements
+    // wait for the DOM before querying elements
     await new Promise(resolve => requestAnimationFrame(resolve));
 
     const { config } = await import("./data/maple-bridge/config.js");
@@ -51,7 +54,6 @@
       .map((spel) => spel.html)
       .join("");
     const paras = await FileAttachment("./data/maple-bridge/paras.json").json();
-    // scores are in milliseconds (converted from the Framework originals' hundredths of a second)
     const scores = await FileAttachment("./data/maple-bridge/scores.json").json();
 
     const { play, splitIntoChars } = await import("scoringthespeltair");

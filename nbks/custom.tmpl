@@ -12,57 +12,63 @@
       @import url("@fontsource-variable/source-serif-4/wght-italic.css");
       @import url("@fontsource-variable/spline-sans-mono/wght.css");
       @import url("@fontsource-variable/spline-sans-mono/wght-italic.css");
-      /* the poems' type: Source Serif 4 with its optical-size axis (family "Source Serif 4 Variable") */
+      /* the poems' type: Source Serif 4 with its optical-size axis
+         (family "Source Serif 4 Variable") */
       @import url("@fontsource-variable/source-serif-4/opsz.css");
       @import url("@fontsource-variable/source-serif-4/opsz-italic.css");
-      /* padding and borders count inside an element's width/height; without this, width:100% plus padding/border overflows its container */
+      /* padding and borders count inside an element's width and
+         height, so width:100% plus padding does not overflow */
       *, *::before, *::after {
         box-sizing: border-box;
       }
-      /* force no top margin on every element except the html tag, which keeps a small margin (set below) */
+      /* no top margin on any element but html (set below) */
       *:not(html) {
         margin-top:0 !important;
       }
-      /* every cell's wrapper div gets Observable's default cell margin (17px 0); this project never relies on that spacing (each page has at most one visible content cell), so it's collapsed everywhere rather than just on empty/hidden cells, which is fragile (:empty only matches a cell with zero child nodes, including no whitespace text nodes) */
+      /* Observable gives every cell's wrapper div a margin (17px 0).
+         Each page has at most one visible content cell, so the
+         margin is removed everywhere; targeting only empty or
+         hidden cells with :empty is fragile. */
       .observablehq--cell {
         margin: 0;
       }
-      /* edit your backgound colors
-        these colors are intended to show you where the elements are
-        and how to configure them */
       html {
         background-color: black;
         margin:0;
-        padding:0; /* change this to override template default */
+        padding:0;
         border:0;
       }
-      /* and edit this for body properties */
       body {
         background-color: black;
         color: floralwhite;
         cursor: none;
         max-width: none;
         margin:0;
-        padding:0; /* change this to override template default */
+        padding:0;
         border:0;
       }
       main {
         /* background-color: red; */
         max-width: none;
         margin:0;
-        padding:0; /* change this to override template default */
+        padding:0;
         border:0;
       }
       /* --- the poems (maple-bridge, river-snow, treading-void) ---
-         Each poem page is a #frame holding an optional calligraphy <img> and the #field the spels are
-         placed in (spels carry their own left/top in vw, measured at the font weight in the poem's
-         config). The defaults here are minimal: #frame only claims the space, the img only sits in it,
-         and all text defaults live on #field. A poem page overrides only what differs (field position,
-         image size/position, field font size) in a <style> in its own html cell. The engine toggles
-         .visible (and, per score, e.g. .glow). */
-      /* the frame takes the whole viewport width left by the elements above it, and the full viewport height,
-         as two columns: the image (sized by its own aspect ratio) and the field (the rest). A poem sets
-         padding/column-gap on the frame to space them (not margin: margin-top is forced to 0 above). */
+         Each poem page is a #frame holding an optional calligraphy
+         <img> and the #field the spels are placed in (spels carry
+         their own left/top in vw, measured at the font weight in
+         the poem's config). #frame only claims the space, the img
+         only sits in it, and all text defaults live on #field. A
+         poem overrides only what differs (field position, image
+         size and position, field font size) in a <style> in its
+         own html cell. The engine toggles .visible (and, per
+         score, e.g. .glow). */
+      /* the frame is the full viewport height and the width left by
+         the elements above it, in two columns: the image (sized by
+         its aspect ratio) and the field (the rest). A poem sets
+         padding and column-gap on the frame to space them (not
+         margin: margin-top is forced to 0 above). */
       #frame {
         display: grid;
         grid-template-columns: auto 1fr;
@@ -73,10 +79,13 @@
         height: 100vh;
         height: 100dvh;
       }
-      /* first column: as tall as the frame's content box, as wide as its aspect ratio gives */
+      /* first column: the image's width is set here (25vw) and its
+         height follows its aspect ratio */
       #frame img {
         grid-column: 1;
-        align-self: start; /* don't stretch the row's height when a poem sets height:auto */
+        /* do not stretch the row's height when a poem sets
+           height:auto */
+        align-self: start;
         display: block;
         height: auto;
         width: 25vw;
@@ -85,8 +94,9 @@
       #frame img.zi {
         filter: invert(1);
       }
-      /* the field is the second column, the textual animation: it is the positioning context (its top-left
-         is the origin of the spels' own left/top; a poem may nudge it with top/left); all text defaults are here */
+      /* the field is the second column, the textual animation. It is
+         the positioning context: its top-left is the origin of the
+         spels' own left/top (a poem may nudge it with top/left). */
       #field {
         grid-column: 2;
         position: relative;
@@ -117,7 +127,8 @@
       .spel.visible {
         opacity: 1;
       }
-      /* with config.charFades each spel is split into .char spans, which carry the fade */
+      /* with config.charFades each spel is split into .char spans,
+         which carry the fade */
       .char {
         opacity: 0;
         transition: all 1.3s ease-in-out;
@@ -130,7 +141,8 @@
         text-shadow: 0 -0.3ch 0.5ch white, 0 0.3ch 0.5ch white,
           0 -0.6ch 1ch white, 0 0.6ch 1ch white;
       }
-      /* the credits: hidden until hovered, or until the cycle's credits pause */
+      /* the credits: hidden until hovered, or until the credits
+         pause at the end of a cycle */
       #byline {
         position: fixed;
         left: 0;

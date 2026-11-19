@@ -9,7 +9,8 @@ const config = {
   fadeWords: -1, // scores do their own fading
   creditsPauseMs: 0, // zero for no credits
   interCycleMs: 3000,
-  interScoreMs: 6000, // between quatrains' paragraphs (the original paused 3 s after and 3 s before each)
+  // between the quatrains' paragraphs
+  interScoreMs: 6000,
   durationScale: 1, // multiplier on all durations
 };
 export { config };

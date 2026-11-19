@@ -8,7 +8,8 @@ const config = {
   charFades: true,
   charIntervalMs: 80,
   fadeWords: -1, // scores do their own fading
-  cycleScores: true, // one cycle plays all eighteen scores (one para): without it a "cycle" was a single score
+  // one cycle plays all eighteen scores (one paragraph)
+  cycleScores: true,
   creditsPauseMs: 0, // zero for no credits
   interCycleMs: 3000,
   interScoreMs: 0,

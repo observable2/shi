@@ -23,7 +23,7 @@
     </div>
   </script>
   <script id="3" type="module">
-    // Wait for the DOM to be ready before querying elements
+    // wait for the DOM before querying elements
     await new Promise(resolve => requestAnimationFrame(resolve));
 
     const { config } = await import("./data/treading-void/config.js");
@@ -39,7 +39,6 @@
       .map((spel) => spel.html)
       .join("");
     const paras = await FileAttachment("./data/treading-void/paras.json").json();
-    // scores are in milliseconds (converted from the Framework originals' hundredths of a second)
     const scores = await FileAttachment("./data/treading-void/scores.json").json();
 
     const { play, splitIntoChars } = await import("scoringthespeltair");
