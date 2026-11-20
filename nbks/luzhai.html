@@ -1,0 +1,66 @@
+<!doctype html>
+<notebook theme="midnight">
+  <title>Luzhai</title>
+  <script id="2" type="text/markdown" hidden="">
+    # Luzhai
+  </script>
+  <script id="1" type="text/html">
+    <style>
+      /* No calligraphy: the field is the frame's only child, so the
+         frame's gap goes. The type and the fade times come from
+         config.json (typeCss, below). The two rules per unit are the
+         fade in and the fade out, as in the engine's player. */
+      #frame {
+        column-gap: 0;
+      }
+      #field {
+        top: 3vw;
+      }
+      .char {
+        transition: all var(--fade-out, 1.3s) ease-in-out;
+      }
+      .char.visible {
+        transition: all var(--fade-in, 1.3s) ease-in-out;
+      }
+      .spel {
+        transition: all var(--fade-out, 1.3s) ease-in-out;
+      }
+      .spel.visible {
+        transition: all var(--fade-in, 1.3s) ease-in-out;
+      }
+    </style>
+    <div id="frame">
+      <div id="field"></div>
+    </div>
+    <div id="byline">
+      <span id="bytext"><cite>Luzhai</cite> by Wang Wei (699-759), translated by John Cayley.</span>
+    </div>
+  </script>
+  <script id="3" type="module">
+    // wait for the DOM before querying elements
+    await new Promise(resolve => requestAnimationFrame(resolve));
+
+    // The config exported by scoring-luzhai.html: the settings the
+    // spels were measured with.
+    const { createConfig, typeCss, mount, play } = await import("scoringthespeltair");
+    const config = createConfig(await FileAttachment("./data/luzhai/config.json").json());
+    // the type, from that config (typeCss)
+    const typeStyle = document.createElement("style");
+    typeStyle.textContent = typeCss(config, "#field");
+    document.head.append(typeStyle);
+    // --- DEBUG configuration
+    // config.startPara = 1; // DEBUG: start at a later paragraph
+    // config.running = false; // DEBUG
+    const fieldElem = document.getElementById("field");
+    const spels = new Map(await FileAttachment("./data/luzhai/spels.json").json());
+    const paras = await FileAttachment("./data/luzhai/paras.json").json();
+    const scores = await FileAttachment("./data/luzhai/scores.json").json();
+    const measuredWith = await FileAttachment("./data/luzhai/measured.json").json();
+    // Puts the spels in the field (split into characters if
+    // config.charFades) and warns in the console if the type differs
+    // from the type they were measured in. The page's grid places
+    // the field, so it is not centred.
+    mount(config, fieldElem, { spels, measuredWith, center: false });
+    if (config.running) play(config, fieldElem, spels, paras, scores);
+  </script>
+</notebook>

@@ -1,12 +1,13 @@
 # shi
 
 Animated translations of classical Chinese quatrains, by John Cayley:
-*Maple Bridge*, *River Snow* and *Treading the Void*. An Observable
-Notebook Kit project, converted from an Observable Framework site
-(`framework/shi`). Each poem's playback uses the shared engine
-[observable2/scoringthespeltair](https://github.com/observable2/scoringthespeltair),
-through the legacy `defaultConfig`; the poem-local `play()` loops of
-the Framework site are gone.
+*Maple Bridge*, *River Snow*, *Treading the Void* and *Luzhai*. An
+Observable Notebook Kit project, converted from an Observable Framework
+site (`framework/shi`). Each poem's playback uses the shared engine
+[observable2/scoringthespeltair](https://github.com/observable2/scoringthespeltair):
+the first three through the legacy `defaultConfig` (the poem-local
+`play()` loops of the Framework site are gone), *Luzhai* through a
+config exported by its scoring notebook (see Luzhai).
 
 Co-implemented with Claude (Sonnet 5.5), 2026-10-31.
 
@@ -26,6 +27,9 @@ nbks/river-snow.html    CSS, loading, play()
 nbks/treading-void.html
 nbks/data/<poem>/       config.js, spels.json, paras.json,
                         scores.json, the calligraphy image
+nbks/luzhai.html        Luzhai's player (no calligraphy)
+nbks/scoring-luzhai.html  Luzhai's scoring notebook
+nbks/data/luzhai/       what the notebook exports (see Luzhai)
 raw/maple-bridge/       (untracked) recordings and score sources,
                         not built
 ```
@@ -36,6 +40,25 @@ the spels in `#field`, splits them into characters if `charFades`, and
 calls `play()`. Only the `<style>` in each notebook differs (the
 field's position, the image). To add a poem, copy a notebook and a
 `data/<poem>/` folder, and add a link in `index.html`.
+
+## Luzhai
+
+Unlike the other three, *Luzhai* is scored in a notebook, made from the
+engine's scoring template (`scoring-luzhai.html`, the same cells as
+`noreaster`'s). Enter the translation (with its markup) in the `galley`
+cell, set the `config` cell, optionally align a recording (the
+performance cells), then save the files from the Export cell into
+`nbks/data/luzhai/`: `spels.json`, `paras.json`, `scores.json`,
+`scores-timeToRead.json`, `config.json`, `measured.json` (and
+`onsets.json` if a recording was aligned). `luzhai.html` reads them with
+`createConfig`, so the player cannot disagree with the notebook.
+
+`nbks/data/luzhai/` starts with **placeholder** data (a four-line
+dummy text, roughly placed) so that the page builds; the first export
+replaces it. The page has no image; its only styles are the two fade
+rules per unit and the field's position. The scoring notebook loads the
+engine from jsDelivr (`@v0.15.0`, the one place to change when moving to a
+new release), the page from npm like the others.
 
 ## What came from where
 

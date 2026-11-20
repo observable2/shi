@@ -1,0 +1,1441 @@
+<!doctype html>
+<notebook theme="air">
+  <title>Scoring Luzhai</title>
+  <script id="1" type="text/markdown">
+    # Scoring Luzhai
+    #### *Luzhai*, translated by John Cayley
+    Working notebook for this poem, made from the Scoring Template
+    (version 1.1.0). Enter the translation, with its markup, in the
+    `galley` cell and set the configuration in the `config` cell.
+    Then save the data files from the Export cell into
+    `nbks/data/luzhai/` (it asks before replacing a file; or download
+    them and move them there). `luzhai.html` plays them. The template
+    notebook documents the markup, the settings and playback.
+  </script>
+  <script id="3254" type="module" pinned="">
+    // THE ENGINE, from GitHub through jsDelivr (raw.github-
+    // usercontent.com serves text/plain, which browsers refuse as
+    // a module). This is the one place the notebook names the
+    // engine's version: "@main" follows the branch (cached, so it
+    // can lag a push, and is unreleased); a release tag such as
+    // "@v0.5.0" pins it. To move to a new release, change this
+    // tag (scripts/bump.js does it for a whole project; see the
+    // engine's README, "Releases").
+    const engine = "https://cdn.jsdelivr.net/gh/observable2/scoringthespeltair@v0.15.0";
+    const load = async (f) => {
+      try { return await import(`${engine}/${f}`); }
+      catch (e) { throw new Error(`Could not load the engine file ${f} from ${engine} (offline, or tag missing?): ${e.message}`); }
+    };
+    const { createConfig, expandScoreSettings, configSchema, measuredWith } = await load("config.js");
+    const { typeCss } = await load("typography.js");
+
+    // createConfig gives every setting the engine's default and
+    // applies only what you override here (it warns in the console
+    // about a key it does not know). The exported config (see Export)
+    // is what the player reads, so notebook and player cannot
+    // disagree. Paragraphs, columns and fields are not set here: they
+    // come from the <!--@ ... --> markup in the galley.
+    const config = createConfig({
+      // --- MEASURE: the type and layout the spels are
+      // measured in (the spel data depends on these).
+      // Defaults shown.
+      // fontFamily: "Source Serif 4", // from Google Fonts
+      // fontWeight: 300,
+      fontSizeVw: 2.5,     // spel positions scale with it
+      // lineHeight: 1.8,
+      // opsz: 14,         // null: leave to the browser
+      // ligatures: "no-common-ligatures",
+      // clmnRight: 0,     // vw added to every spel in a
+      //   clmn named "right"
+
+      // --- PLAY: read by the engine while the piece plays
+      // (set here to try it; export to use it).
+      // Defaults shown.
+      // Showing:
+      // charFades: true,    // reveal character by character
+      // charIntervalMs: 80, // delay between characters
+      // durationScale: 1,   // multiplier on every duration
+
+      // Fading out. fadeOut is what fades the spels:
+      //   "window" each spel, fadeWords spels after it
+      //   "scored" the score's own items do it
+      //   "score"  a score's spels, after its last item
+      //   "ofld"   an ofld's spels, after the score that
+      //            ends it
+      //   "cycle"  everything, at the end of the cycle
+      fadeOut: "score",
+      // fadeWords: 5,       // for "window"
+      // fadeStyle: "together", // or "sequence": in the
+      //   order shown, each after its item's duration
+      // fadeOrder: "shown", // or "reverse", "random"
+      // fadeStaggerMs: 300, // a fixed step, for "sequence"
+      // holdMs: 0,          // least time all is shown
+      //   before it fades (from the last spel)
+      // overlapMs: 0,       // next score starts this long
+      //   after the fade begins (cross-fade)
+      // revealStyle: "sequence", // "together": a whole
+      //   score's spels at once
+
+      // Gaps (ms):
+      // interScoreMs: 3000, // after a score ...
+      // interParaMs: 1000,  // ... after one ending a para
+      // interFieldMs: 3000, // ... after one ending an ofld
+      // interCycleMs: 3000, // at the start and at each cycle's end
+      // clearPauseMs: 1300, // dark time after a fade
+      // creditsPauseMs: 0,  // #byline shown at cycle end
+
+      // startPara: 0,       // paragraph a cycle starts at
+      // cycleScores: false, // true: a cycle plays every
+      //   score in turn (see scoreSettings)
+
+      // --- PAGE: applied by the page's CSS. Defaults shown.
+      // fadeMs: 1300,       // fade of a character (charFades)
+      //   or a whole spel, in and out; a score may set its own
+      // fadeInMs: 1300,     // when it appears, instead of fadeMs
+      // fadeOutMs: 1300,    // when it disappears, instead
+
+      // scoreSettings: set it through perScore, below
+    })
+    // Settings for only some scores (anything scoreSettings takes:
+    // interFieldMs, clearPauseMs, interCycleMs, holdMs, fadeOut,
+    // durationScale, effect, fadeOutMs ...). Name a score by its
+    // number from 0 (-1 counts from the end), "first", "last" or
+    // "all". The export turns this into the scoreSettings array,
+    // once the number of scores is known (expandScoreSettings).
+    // interFieldMs: time shown before the fade; clearPauseMs: dark
+    // time after it.
+    // For example:
+    // const perScore = {
+    //   last: { interFieldMs: 3500, interCycleMs: 8000 },
+    // }
+    const perScore = {}
+  </script>
+  <script id="5891" type="text/html" pinned="">
+    <div id="galley" class="set"><!--@ ofld -->first line of the translation
+              second line, indented
+    third line
+              fourth line<!--@ /ofld --></div>
+  </script>
+  <script id="5895" type="text/html">
+    <!-- The spanned galley as the maker sees it: clmn:right really
+         offset by config.clmnRight, a rule between ofld's. The same
+         spans, minus the rules, are measured for the spel data. -->
+    <div>${spanned.elem}</div>
+  </script>
+  <script id="5749" type="module" pinned="">
+    // The reading-time estimators come from the engine (see `engine`
+    // above). They return milliseconds.
+    const { spelTime } = await import(`${engine}/timetoread.js`)
+  </script>
+  <script id="5741" type="module" pinned="">
+    // one score (array of { id, duration }) per para, in text order. A
+    // spel's duration (ms) is spelTime: the time to read it (the
+    // whitespace inside a multi-word spel counts) plus the whitespace
+    // that follows it in the galley, up to the next spel (the galley is
+    // white-space: pre, so its whitespace is respected). The last spel
+    // of a para carries no such gap and no end-of-para duration: what
+    // follows the end of a para or field is the engine's to time, with
+    // config.interParaMs and interFieldMs (a score may override them:
+    // see scoreSettings), not the score's.
+    const readOptions = { whitespace: "respect" }
+    const scores = paraList.map((ids) =>
+      ids.map((id, i) => {
+        const spel = spels.get(id);
+        const following = Array.from(spels.values())[spel.index + 1];
+        const gap = i === ids.length - 1 ? "" : layout.text.slice(spel.end, following ? following.start : undefined);
+        return { id, duration: spelTime(spel.string, gap, 1, readOptions) };
+      }))
+  </script>
+  <script id="7001" type="text/markdown">
+    ---
+    ### Performance: timing the scores from a recording
+    The linear scores above time each spel by an *estimate* of reading time.
+    Here you can time them from a **recording of your own performance**
+    instead. Upload a recording of the whole work (English only for now). The
+    notebook then
+
+    1. *listens* to it with Whisper, a speech recognizer that runs in your
+       browser (the model is downloaded once from Hugging Face and then
+       cached; your audio never leaves your machine) and returns the words
+       heard with their times;
+    2. *aligns* the words heard to the words of the galley (Whisper is only a
+       listener: the galley is the text, so a misheard word does not matter
+       much);
+    3. gives each spel an **onset**, the second at which its first word
+       begins. Whisper often starts the first word after a silence too early,
+       so where a word's span contains a silence the onset is *snapped* to
+       where the sound resumes (shown in orange). A spel's `duration` is the
+       time from its onset to the next spel's onset;
+    4. lets you **adjust the onsets paragraph by paragraph**, listening as you
+       go.
+
+    Spels that could not be matched to anything heard are marked *guessed* (in
+    red), and a duration longer than 1.5 s is flagged ⚑ (in red): check those
+    first. When you are satisfied, the Export cell below uses the performed
+    scores in `scores.json` in place of the linear ones.
+  </script>
+  <script id="7002" type="module">
+    // THE CONTROLS: a recording, a Whisper model, and a button to
+    // start. Listening is slow, so it only happens when the button is
+    // pressed, never just because the file or the model changed.
+
+    // The models on offer. ".en" models know only English. Bigger
+    // models hear poems better, and are slower to download and to run.
+    // Xenova/... are the converted Whisper models that Transformers.js
+    // uses.
+    const whisperModels = {
+      "tiny: fastest, about 40 MB": "Xenova/whisper-tiny.en",
+      "base: about 75 MB": "Xenova/whisper-base.en",
+      "small: slowest, about 250 MB, hears best": "Xenova/whisper-small.en"
+    }
+
+    // A plain file input, not Inputs.file: its .files is the browser's
+    // own list of the files chosen
+    const recordingInput = html`<input type="file" accept="audio/*">`
+    const recordingLabel = html`<label>Recording of the whole work: ${recordingInput}</label>`
+    const modelPicker = Inputs.select(Object.keys(whisperModels), { label: "Whisper model", value: "base: about 75 MB" })
+    const transcribeButton = Inputs.button("Listen and align")
+
+    // The input's files are a FileList (empty until something is
+    // chosen), so we take the first File, or null.
+    const firstFile = (files) => (files && files.length ? files[0] : null)
+
+    display(html`<div>${recordingLabel}${modelPicker}${transcribeButton}</div>`)
+  </script>
+  <script id="7003" type="module">
+    // The number of times the button has been pressed (0 until the
+    // first press). Cells that depend on this one run when the button
+    // is pressed. They read the file and the model from the inputs
+    // directly, so changing those alone does not start a new (slow)
+    // listen.
+    const transcribeClicks = Generators.input(transcribeButton)
+  </script>
+  <script id="7004" type="module">
+    // LISTENING: runs Whisper on the recording. Gives an array of the
+    // words heard, in order:
+    //   [{ text: "broad", start: 12.34, end: 12.71 }, ...]
+    // (seconds from the start of the recording), with the recording's
+    // samples (.samples, mono, at .sampleRate) as properties of the
+    // array; or null until the button has been pressed.
+
+    // Which version of Transformers.js to use, from jsDelivr, as the
+    // engine is loaded above. To use another version, change this one
+    // line.
+    const transformersUrl = "https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.5.1"
+
+    const heard = await (async () => {
+      if (!transcribeClicks) return null
+
+      const file = firstFile(recordingInput.files)
+      if (!file) {
+        display(html`<p><i>Choose a recording first, then press the button again.</i></p>`)
+        return null
+      }
+
+      // a line of text that we keep rewriting to say what is going on
+      const status = html`<p><i>Starting…</i></p>`
+      display(status)
+
+      try {
+        // 1. Decode the recording to what Whisper wants: 16000 samples
+        //    a second, mono. An AudioContext made at 16000 Hz resamples
+        //    for us as it decodes. For a stereo recording we take the
+        //    left channel.
+        status.textContent = "Reading the recording…"
+        const audioContext = new AudioContext({ sampleRate: 16000 })
+        const decoded = await audioContext.decodeAudioData(await file.arrayBuffer())
+        const samples = decoded.getChannelData(0)
+        audioContext.close()
+
+        // 2. Load the model (downloaded the first time, then cached by
+        //    the browser).
+        const { pipeline } = await import(transformersUrl)
+        const transcriber = await pipeline("automatic-speech-recognition", whisperModels[modelPicker.value], {
+          progress_callback: (p) => {
+            if (p.status === "progress") status.textContent = `Downloading ${p.file}: ${Math.round(p.progress)}%`
+          }
+        })
+
+        // 3. Listen. "word" timestamps give a start and end for every
+        //    word. Whisper works on 30 second pieces, so a longer
+        //    recording is cut into overlapping chunks and put back
+        //    together.
+        status.textContent = "Listening… (a long recording can take several minutes)"
+        const result = await transcriber(samples, {
+          return_timestamps: "word",
+          chunk_length_s: 30,
+          stride_length_s: 5
+        })
+
+        status.textContent = `Heard ${result.chunks.length} words.`
+        // Whisper's word times are not always where the sound is (see
+        // SNAPPING), so we also keep the samples themselves, as
+        // properties of the array.
+        const words = result.chunks.map((chunk) => ({ text: chunk.text.trim(), start: chunk.timestamp[0], end: chunk.timestamp[1] }))
+        return Object.assign(words, { samples, sampleRate: 16000 })
+      } catch (error) {
+        status.textContent = `Could not listen to the recording: ${error.message}`
+        return null
+      }
+    })()
+  </script>
+  <script id="7005" type="module">
+    // ALIGNING, part 1: the tools. The words heard are not exactly the
+    // words of the galley (Whisper mishears, skips, adds). We line the
+    // two lists of words up, allowing for that, with the classic
+    // "Needleman-Wunsch" method: fill a grid of scores, then walk back
+    // through it to find the best pairing.
+
+    // A word with the case, accents, apostrophes and punctuation taken
+    // out, so "Cobbett’s" and "cobbett's" are the same. Uses slugify
+    // (see the spel cell above), and drops its hyphens.
+    const normalizeWord = (word) => slugify(word).replace(/-/g, "")
+
+    // The words of the galley, in order, each remembering which spel it
+    // belongs to. A spel of several words gives several entries; a spel
+    // with no letters in it (a dash) gives none.
+    const scriptWords = []
+    for (const spel of spels.values()) {
+      for (const word of spel.string.split(/\s+/)) {
+        const normal = normalizeWord(word)
+        if (normal) scriptWords.push({ spelId: spel.id, word: normal })
+      }
+    }
+
+    // The number of single-letter changes (add, remove, change) that
+    // turn a into b.
+    const editDistance = (a, b) => {
+      let previous = Array.from({ length: b.length + 1 }, (_, j) => j)
+      for (let i = 1; i <= a.length; i++) {
+        const row = [i]
+        for (let j = 1; j <= b.length; j++) {
+          const change = a[i - 1] === b[j - 1] ? 0 : 1
+          row[j] = Math.min(previous[j] + 1, row[j - 1] + 1, previous[j - 1] + change)
+        }
+        previous = row
+      }
+      return previous[b.length]
+    }
+
+    // How well two words pair up: +2 if they are the same, +1 if they
+    // are nearly the same ("sing" and "sang" are, 60% alike or more),
+    // -1 if they are different. Tweak these numbers to be stricter or
+    // looser.
+    const pairScore = (a, b) => {
+      if (a === b) return 2
+      const alike = 1 - editDistance(a, b) / Math.max(a.length, b.length)
+      return alike >= 0.6 ? 1 : -1
+    }
+
+    // The score for leaving a word unpaired (a word of the galley not
+    // heard, or a word heard that is not in the galley).
+    const GAP = -1
+
+    // For each word of `script` (an array of words), the index of the
+    // word in `heardList` that it is paired with, or -1 if it is not
+    // paired. Both are arrays of normalized words.
+    const alignSequences = (script, heardList) => {
+      const n = script.length
+      const m = heardList.length
+      if (n * m > 60e6) throw new Error(`The work (${n} words) and the recording (${m} words) are too long to align at once.`)
+      const width = m + 1
+
+      // score[i * width + j]: the best score for the first i words
+      // of the script against the first j words heard
+      // came[...]: how that best was reached: 0 = paired both,
+      // 1 = script word i skipped, 2 = heard word j skipped
+      const score = new Int32Array((n + 1) * width)
+      const came = new Uint8Array((n + 1) * width)
+      for (let i = 1; i <= n; i++) { score[i * width] = i * GAP; came[i * width] = 1 }
+      for (let j = 1; j <= m; j++) { score[j] = j * GAP; came[j] = 2 }
+
+      for (let i = 1; i <= n; i++) {
+        for (let j = 1; j <= m; j++) {
+          const both = score[(i - 1) * width + (j - 1)] + pairScore(script[i - 1], heardList[j - 1])
+          const skipScript = score[(i - 1) * width + j] + GAP
+          const skipHeard = score[i * width + (j - 1)] + GAP
+          const best = Math.max(both, skipScript, skipHeard)
+          score[i * width + j] = best
+          came[i * width + j] = best === both ? 0 : best === skipScript ? 1 : 2
+        }
+      }
+
+      // Walk back from the far corner to the near one, noting pairs.
+      const matches = new Array(n).fill(-1)
+      let i = n
+      let j = m
+      while (i > 0 || j > 0) {
+        const how = came[i * width + j]
+        if (how === 0) {
+          // paired, but only count it if the words really are alike (a
+          // pair scoring -1 is a stand-in)
+          if (pairScore(script[i - 1], heardList[j - 1]) > 0) matches[i - 1] = j - 1
+          i--; j--
+        } else if (how === 1) i--
+        else j--
+      }
+      return matches
+    }
+  </script>
+  <script id="7010" type="module">
+    // SNAPPING: Whisper's start time for the first word after a silence
+    // is often too early: the word is stretched back over the silence,
+    // to the end of the word before, so a line that follows a long
+    // pause gets a very long duration. Here we look at the
+    // sound itself: a word's start moves to where the sound resumes
+    // whenever the span Whisper gave the word contains a silence.
+
+    // loudness is measured in frames this long
+    const FRAME_S = 0.01
+    // a frame is sound if it is this much louder than the quietest 10%
+    // of the recording
+    const ABOVE_FLOOR_DB = 15
+    // a silence is at least this long
+    const MIN_SILENCE_S = 0.25
+    // the sound is found at its first loud frame: start a little before
+    // it
+    const LEAD_S = 0.03
+
+    // one true or false per frame of the recording: is there sound
+    // (speech, breath, a click) in it?
+    const soundFrames = (samples, sampleRate) => {
+      const size = Math.round(sampleRate * FRAME_S)
+      const count = Math.floor(samples.length / size)
+      const db = new Float32Array(count)
+      for (let k = 0; k < count; k++) {
+        let sum = 0
+        for (let i = k * size; i < (k + 1) * size; i++) sum += samples[i] * samples[i]
+        // the frame's mean power, in dB
+        db[k] = 10 * Math.log10(sum / size + 1e-12)
+      }
+      const floor = Array.from(db).sort((a, b) => a - b)[Math.floor(count * 0.1)]
+      return Array.from(db, (v) => v > floor + ABOVE_FLOOR_DB)
+    }
+
+    // Where the sound resumes after the last long silence in [start,
+    // end] (seconds), or null if there is no such silence in the span
+    // (or the span ends in one, which leaves no sound to start at).
+    const snapOnset = (sound, start, end) => {
+      const a = Math.max(0, Math.floor(start / FRAME_S))
+      const b = Math.min(sound.length, Math.ceil(end / FRAME_S))
+      const longest = Math.round(MIN_SILENCE_S / FRAME_S)
+      let onset = null
+      let silent = 0
+      for (let k = a; k < b; k++) {
+        if (!sound[k]) silent++
+        else {
+          if (silent >= longest) onset = k
+          silent = 0
+        }
+      }
+      return onset === null ? null : Math.max(start, onset * FRAME_S - LEAD_S)
+    }
+  </script>
+  <script id="7006" type="module">
+    // ALIGNING, part 2: the onset of every spel. Gives one row per
+    // spel, in text order:
+    //   { id, para, string, heard, onset (seconds),
+    //     how: "matched" | "snapped" | "guessed" }
+    // or null until something has been heard.
+
+    // A spel with nothing matched to it is placed between its
+    // neighbours, or, after the last matched spel, this many seconds
+    // apart.
+    const GUESS_SPEL_S = 0.5
+
+    const aligned = (() => {
+      if (!heard) return null
+
+      // the words heard, normalized (a word that normalizes to nothing
+      // is dropped); a word's end, which Whisper may not give, is taken
+      // to be the start of the next word heard
+      const heardWords = heard
+        .map((h, i) => ({ word: normalizeWord(h.text), text: h.text, start: h.start ?? 0, end: h.end ?? heard[i + 1]?.start ?? h.start ?? 0 }))
+        .filter((h) => h.word)
+
+      // the sound of the recording, to snap onsets to (see SNAPPING)
+      const sound = heard.samples ? soundFrames(heard.samples, heard.sampleRate) : null
+
+      const matches = alignSequences(scriptWords.map((w) => w.word), heardWords.map((h) => h.word))
+
+      // The first word matched in each spel gives the spel's onset.
+      const firstHeard = new Map() // spel id -> index in heardWords
+      // spel id -> the words heard for it, as Whisper wrote them
+      const heardAs = new Map()
+      scriptWords.forEach((scriptWord, i) => {
+        if (matches[i] < 0) return
+        if (!firstHeard.has(scriptWord.spelId)) firstHeard.set(scriptWord.spelId, matches[i])
+        if (!heardAs.has(scriptWord.spelId)) heardAs.set(scriptWord.spelId, [])
+        heardAs.get(scriptWord.spelId).push(heardWords[matches[i]].text)
+      })
+
+      let snappedCount = 0
+      const rows = Array.from(spels.values(), (spel) => {
+        const j = firstHeard.get(spel.id)
+        let onset = j === undefined ? null : heardWords[j].start
+        let how = j === undefined ? "guessed" : "matched"
+        if (sound && j !== undefined) {
+          const snapped = snapOnset(sound, heardWords[j].start, heardWords[j].end)
+          if (snapped !== null && snapped - onset > 0.05) { onset = snapped; how = "snapped"; snappedCount++ }
+        }
+        return {
+          id: spel.id, para: spel.para, string: spel.string,
+          // what Whisper wrote for this spel, to see how it was matched
+          heard: (heardAs.get(spel.id) ?? []).join(" "),
+          onset, how
+        }
+      })
+
+      // Fill in the spels that were not matched.
+      const known = rows.flatMap((row, i) => (row.onset === null ? [] : [i]))
+      if (!known.length) throw new Error("None of the words heard match the text. Is this the right recording?")
+      const first = known[0]
+      const last = known[known.length - 1]
+      // before the first match: at the first match
+      for (let i = 0; i < first; i++) rows[i].onset = rows[first].onset
+      // between two matches: spread evenly between them
+      for (let k = 0; k < known.length - 1; k++) {
+        const a = known[k]
+        const b = known[k + 1]
+        for (let i = a + 1; i < b; i++) {
+          rows[i].onset = rows[a].onset + ((rows[b].onset - rows[a].onset) * (i - a)) / (b - a)
+        }
+      }
+      // after the last match: a fixed step apart
+      for (let i = last + 1; i < rows.length; i++) rows[i].onset = rows[last].onset + GUESS_SPEL_S * (i - last)
+
+      // hundredths of a second are plenty, and are what the editor
+      // below shows
+      rows.forEach((row) => { row.onset = Math.round(row.onset * 100) / 100 })
+
+      display(html`<p>${known.length} of ${rows.length} spels were matched to words heard; the other ${rows.length - known.length} are guessed. ${snappedCount} onsets were moved later, to where the sound resumes after a silence (<i>snapped</i>).</p>`)
+      return rows
+    })()
+  </script>
+  <script id="7007" type="module">
+    // THE EDITOR: adjust the onsets one paragraph at a time.
+    // onsetEditor(...) makes an element whose .value is an array of
+    // onsets (seconds), one per spel in text order, and which sends an
+    // "input" event whenever one changes: that is what makes it a
+    // `view` (below) that other cells can depend on.
+
+    // When you play from a spel, start this many seconds before it, to
+    // hear the approach.
+    const LEAD_IN_S = 0.5
+    // A spel whose duration (the time to the next spel's onset, in its
+    // para) is longer than this is flagged: a long duration is often an
+    // onset that is too early, or the next one too late. Check those
+    // first.
+    const FLAG_DURATION_S = 1.5
+
+    const onsetEditor = (rows, file, paraNames) => {
+      // THE STATE: the onsets being edited, and what we say about how
+      // each came to be
+      const onsets = rows.map((row) => row.onset)
+      const labels = rows.map((row) => row.how)
+
+      // The audio player. The editor makes (and, below, the cell that
+      // uses it revokes) its own URL for the file. The browser labels
+      // some files with a type its <audio> element will not play (an
+      // .m4a comes as "audio/x-m4a"), so we label the audio ourselves
+      // from the file's extension.
+      const types = { m4a: "audio/mp4", mp4: "audio/mp4", aac: "audio/aac", mp3: "audio/mpeg", wav: "audio/wav", ogg: "audio/ogg", flac: "audio/flac" }
+      const type = types[file.name.split(".").pop().toLowerCase()] ?? file.type
+      const audio = html`<audio controls style="width:100%"></audio>`
+      audio.src = URL.createObjectURL(new Blob([file], { type }))
+      // if the browser cannot play it, say why
+      const audioError = html`<p style="color:crimson"></p>`
+      audio.addEventListener("error", () => {
+        audioError.textContent = `The audio cannot be played: ${audio.error ? audio.error.message || "error code " + audio.error.code : "unknown error"}`
+      })
+      const paraSelect = Inputs.select(paraNames, { label: "Paragraph" })
+      const playParaButton = html`<button>▶ play this paragraph</button>`
+      const table = html`<table><thead><tr><th></th><th>spel</th><th>onset (s)</th><th></th><th>duration (s)</th><th>heard as</th><th></th></tr></thead><tbody></tbody></table>`
+      const tbody = table.querySelector("tbody")
+
+      const root = html`<div>
+        <div style="display:flex;gap:1em;align-items:center">${paraSelect}${playParaButton}</div>
+        ${audio}${audioError}${table}
+      </div>`
+      root.value = onsets.slice()
+
+      // the positions (in text order) of the spels of a paragraph
+      const spelsOfPara = (name) => rows.flatMap((row, i) => (row.para === name ? [i] : []))
+
+      // PLAYING: from `start` seconds, stopping (if wanted) at `stop`
+      // seconds
+      let stopAt = Infinity
+      const playFrom = (start, stop) => {
+        audio.currentTime = Math.max(0, start)
+        stopAt = stop
+        audio.play()
+      }
+      playParaButton.onclick = () => {
+        const indices = spelsOfPara(paraSelect.value)
+        // the first spel of the paragraph after
+        const next = indices[indices.length - 1] + 1
+        playFrom(onsets[indices[0]] - LEAD_IN_S, next < onsets.length ? onsets[next] : Infinity)
+      }
+
+      // The rows now on screen: [{ i, tr }], and a light behind the
+      // spel being heard.
+      let shown = []
+      const highlight = (time) => {
+        let current = -1
+        shown.forEach(({ i }, k) => { if (onsets[i] <= time) current = k })
+        shown.forEach(({ tr }, k) => { tr.style.background = k === current ? "lemonchiffon" : "" })
+      }
+      // While playing, look at the clock every frame (the audio's own
+      // "timeupdate" is too slow to follow words).
+      const tick = () => {
+        if (audio.currentTime >= stopAt) { audio.pause(); stopAt = Infinity }
+        highlight(audio.currentTime)
+        if (!audio.paused) requestAnimationFrame(tick)
+      }
+      audio.addEventListener("play", () => requestAnimationFrame(tick))
+      audio.addEventListener("pause", () => highlight(audio.currentTime))
+      audio.addEventListener("seeked", () => highlight(audio.currentTime))
+
+      // a table cell holding whatever it is given
+      const td = (...content) => {
+        const cell = document.createElement("td")
+        cell.append(...content)
+        return cell
+      }
+
+      // The duration of the spel at i: the time to the next onset, if
+      // that spel is in the same para (else null)
+      const durationOfSpel = (i) => (i + 1 < rows.length && rows[i + 1].para === rows[i].para ? onsets[i + 1] - onsets[i] : null)
+      // show the durations of the rows on screen, flagging the long
+      // ones
+      const showDurations = () => {
+        shown.forEach(({ i, durationCell }) => {
+          const duration = durationOfSpel(i)
+          const long = duration !== null && duration > FLAG_DURATION_S
+          durationCell.textContent = duration === null ? "" : duration.toFixed(2) + (long ? " ⚑" : "")
+          durationCell.style.color = long ? "crimson" : "gray"
+          durationCell.style.fontWeight = long ? "bold" : ""
+        })
+      }
+
+      // DRAWING the table for the paragraph chosen: one row per spel
+      const render = () => {
+        shown = spelsOfPara(paraSelect.value).map((i) => {
+          const howCell = td(labels[i])
+          const showHow = () => {
+            howCell.textContent = labels[i]
+            howCell.style.color = labels[i] === "guessed" ? "crimson" : labels[i] === "snapped" ? "darkorange" : "gray"
+          }
+          showHow()
+
+          // a change to this spel's onset: record it and tell whoever
+          // is watching
+          const change = (seconds) => {
+            onsets[i] = Math.max(0, seconds)
+            labels[i] = "adjusted"
+            showHow()
+            showDurations()
+            // a new array each time, so watchers see a change
+            root.value = onsets.slice()
+            root.dispatchEvent(new Event("input", { bubbles: true }))
+          }
+
+          const input = html`<input type="number" min="0" step="0.01" style="width:6em" value="${onsets[i].toFixed(2)}">`
+          input.oninput = (event) => {
+            // we send our own event, with the value up to date
+            event.stopPropagation()
+            if (input.value !== "") change(+input.value)
+          }
+
+          const playButton = html`<button title="play from just before this spel">▶</button>`
+          playButton.onclick = () => playFrom(onsets[i] - LEAD_IN_S, Infinity)
+
+          // "now": while listening, press it as the spel begins to set
+          // its onset to the audio's position
+          const nowButton = html`<button title="set the onset to where the audio is now">now</button>`
+          nowButton.onclick = () => {
+            const time = +audio.currentTime.toFixed(2)
+            input.value = time.toFixed(2)
+            change(time)
+          }
+
+          const durationCell = td()
+          const tr = document.createElement("tr")
+          tr.append(td(playButton), td(rows[i].string.replace(/\s+/g, " ")), td(input), td(nowButton), durationCell, td(rows[i].heard), howCell)
+          return { i, tr, durationCell }
+        })
+        tbody.replaceChildren(...shown.map(({ tr }) => tr))
+        showDurations()
+        highlight(audio.currentTime)
+      }
+
+      paraSelect.addEventListener("input", (event) => {
+        event.stopPropagation() // choosing a paragraph changes no onset
+        render()
+      })
+      render()
+
+      return root
+    }
+  </script>
+  <script id="7008" type="module">
+    // `onsets`: the onset in seconds of every spel, in text order, as
+    // last adjusted above (null until something has been heard). Cells
+    // that use it rerun whenever you change a number.
+    const onsets = editor ? view(editor) : null
+  </script>
+  <script id="7012" type="module">
+    // The editor element itself, made once per alignment. (Its own
+    // cell, so that `onsets` above, which shows it, can rerun without
+    // making a new one.) When it is replaced, stop and release its
+    // audio. The file is read from the input now, as the listening cell
+    // does when the button is pressed.
+    const editor = aligned ? onsetEditor(aligned, firstFile(recordingInput.files), layout.order.para) : null
+    if (editor) invalidation.then(() => {
+      const audio = editor.querySelector("audio")
+      audio.pause()
+      URL.revokeObjectURL(audio.src)
+    })
+  </script>
+  <script id="7009" type="module">
+    // THE PERFORMED SCORES, in the same shape as the linear `scores`:
+    // one array of { id, duration } per para, `duration` in
+    // milliseconds. The duration of a spel is the time to the next
+    // spel's onset. The last spel of a para has no next spel in its
+    // para, so it keeps its linear duration (the time to read it: see
+    // `scores` above); what follows the end of a para or a field is the
+    // engine's to time.
+    const performedScores = onsets
+      ? scores.map((score) =>
+          score.map(({ id, duration }, k) => {
+            if (k === score.length - 1) return { id, duration }
+            const here = onsets[spels.get(id).index]
+            const next = onsets[spels.get(score[k + 1].id).index]
+            // never negative, if two onsets are out of order
+            return { id, duration: Math.max(0, Math.round((next - here) * 1000)) }
+          })
+        )
+      : null
+
+    // The scores the export uses: performed if there is a performance,
+    // else linear.
+    const exportedScores = performedScores ?? scores
+
+    // Linear and performed durations side by side, to see what the
+    // performance changed
+    performedScores && display(Inputs.table(
+      performedScores.flatMap((score, p) => score.map(({ id, duration }, k) => ({
+        para: layout.order.para[p], spel: spels.get(id).string.replace(/\s+/g, " "),
+        linearMs: scores[p][k].duration, performedMs: duration
+      }))), { rows: 12 }))
+  </script>
+  <script id="6003" type="module" pinned="">
+    // Export: the files the player reads, in the shape its pages read
+    // them. Save them into the poem's nbks/data/luzhai/, or download
+    // them and move them there. config.json is the whole config
+    // above: the player makes its own from it (createConfig) and
+    // takes its type CSS from it (typeCss), so nothing is set twice.
+    // measured.json is for a player page that keeps its own CSS: pass
+    // it to mount() and the player warns if its type differs from the
+    // type the spels were measured in.
+    // The config to export is `config` above, with scoreSettings built
+    // from `perScore` (config cell) if it names any scores:
+    // expandScoreSettings needs the number of scores, which is known
+    // only here.
+    const exportedConfig = Object.keys(perScore).length
+      ? { ...config, scoreSettings: expandScoreSettings(perScore, exportedScores.length) }
+      : config
+    const piece = {
+      // [[id, spel], ...]: the player builds a Map from it
+      "spels.json": Array.from(spels.entries()),
+      // [[spel ids of para 1], [para 2], ...] in text order
+      "paras.json": paraList,
+      // [[{id, duration}, ...] per para]. scores.json is what the
+      // player reads: timed from the aligned performance if there is
+      // one (see above), else the linear timeToRead scores.
+      "scores.json": exportedScores,
+      // the linear scores from timeToRead, always available, whether or
+      // not there is a performance
+      "scores-timeToRead.json": scores,
+      "config.json": JSON.parse(JSON.stringify(exportedConfig)),
+      "measured.json": measuredWith(config),
+      // the onsets (seconds from the start of the recording) of the
+      // performance, by spel id, if there is one
+      ...(onsets ? { "onsets.json": Object.fromEntries(Array.from(spels.keys(), (id, i) => [id, onsets[i]])) } : {})
+    }
+    // The text of each file as it is written: identical to an existing
+    // file's when the data are the same.
+    const texts = Object.fromEntries(Object.entries(piece).map(([name, data]) => [name, JSON.stringify(data)]))
+
+    // SAVING to the data folder. Where the browser allows it (Chrome,
+    // Edge), pick this poem's nbks/data/luzhai/ once (it is
+    // remembered; the browser asks permission again as needed). Each
+    // file is compared with the one already there, and you choose
+    // which to write: nothing is replaced until you press the button,
+    // and an identical file is left alone.
+    const canSave = typeof window.showDirectoryPicker === "function"
+    const FOLDER_NAME = "luzhai"
+    // one remembered folder per notebook
+    const folderKey = "scoring-export-folder:" + location.pathname
+
+    const handleStore = {
+      open: () => new Promise((resolve, reject) => {
+        const request = indexedDB.open("scoring-export", 1)
+        request.onupgradeneeded = () => request.result.createObjectStore("handles")
+        request.onsuccess = () => resolve(request.result)
+        request.onerror = () => reject(request.error)
+      }),
+      get: async (key) => {
+        const db = await handleStore.open()
+        return new Promise((resolve) => {
+          const request = db.transaction("handles").objectStore("handles").get(key)
+          request.onsuccess = () => resolve(request.result ?? null)
+          request.onerror = () => resolve(null)
+        })
+      },
+      set: async (key, value) => {
+        const db = await handleStore.open()
+        return new Promise((resolve, reject) => {
+          const transaction = db.transaction("handles", "readwrite")
+          transaction.objectStore("handles").put(value, key)
+          transaction.oncomplete = resolve
+          transaction.onerror = () => reject(transaction.error)
+        })
+      }
+    }
+
+    // The folder to write to: the remembered one if we may still write
+    // to it, else ask (or ask again, if `choose`).
+    const getFolder = async (choose) => {
+      if (!choose) {
+        try {
+          const saved = await handleStore.get(folderKey)
+          if (saved && (await saved.requestPermission({ mode: "readwrite" })) === "granted") return saved
+        } catch (error) { /* no remembered folder: ask */ }
+      }
+      const folder = await window.showDirectoryPicker({ id: "scoring-data", mode: "readwrite" })
+      // (a failed remember only means it is asked again next time)
+      try { await handleStore.set(folderKey, folder) } catch (error) {}
+      return folder
+    }
+
+    // the text of a file in the folder, or null if it is not there
+    const readIfThere = async (folder, name) => {
+      try { return await (await (await folder.getFileHandle(name)).getFile()).text() }
+      catch (error) { if (error.name === "NotFoundError") return null; throw error }
+    }
+
+    // how the new text differs from the old, in a few words
+    const describeChange = (oldText, newText) => {
+      const sizes = `${oldText.length.toLocaleString()} → ${newText.length.toLocaleString()} characters`
+      try {
+        const [a, b] = [JSON.parse(oldText), JSON.parse(newText)]
+        const keys = Array.isArray(a) && Array.isArray(b)
+          ? Array.from({ length: Math.max(a.length, b.length) }, (_, i) => i)
+          : [...new Set([...Object.keys(a), ...Object.keys(b)])]
+        const differ = keys.filter((k) => JSON.stringify(a[k]) !== JSON.stringify(b[k])).length
+        return `${differ} of ${keys.length} ${Array.isArray(a) ? "entries" : "keys"} differ (${sizes})`
+      } catch (error) { return sizes }
+    }
+
+    const saver = () => {
+      const status = html`<div></div>`
+      const table = html`<table></table>`
+      const writeButton = html`<button disabled>Write the checked files</button>`
+      const choose = html`<button>${canSave ? "Save to the data folder…" : "Saving to a folder is not supported by this browser: use the downloads"}</button>`
+      choose.disabled = !canSave
+      const say = (text, color = "gray") => { status.textContent = text; status.style.color = color }
+      let folder = null
+      let plan = []
+
+      const check = async (pick) => {
+        try {
+          folder = await getFolder(pick)
+          const rows = []
+          for (const name of Object.keys(texts)) {
+            const old = await readIfThere(folder, name)
+            rows.push({ name, old, state: old === null ? "new" : old === texts[name] ? "identical" : "differs" })
+          }
+          plan = rows.map(({ name, old, state }) => {
+            const box = document.createElement("input")
+            box.type = "checkbox"
+            // an identical file need not be written
+            box.checked = state !== "identical"
+            const note = document.createElement("td")
+            note.textContent = state === "new" ? "new file" : state === "identical" ? "identical: nothing to replace" : "REPLACES: " + describeChange(old, texts[name])
+            note.style.color = state === "differs" ? "crimson" : "gray"
+            const cell = (...content) => { const td = document.createElement("td"); td.append(...content); return td }
+            const row = document.createElement("tr")
+            row.append(cell(box), cell(name), note)
+            return { name, state, box, note, row }
+          })
+          table.replaceChildren(...plan.map(({ row }) => row))
+          writeButton.disabled = false
+          const warnings = []
+          if (folder.name !== FOLDER_NAME) warnings.push(`The folder is called "${folder.name}", not "${FOLDER_NAME}": is it this poem's nbks/data/luzhai/?`)
+          if (rows.every(({ state }) => state === "new")) warnings.push("None of these files is in this folder yet: is it the right folder?")
+          if (!onsets) warnings.push("No performance has been aligned: scores.json is the LINEAR scores, which would replace performed ones.")
+          say(`Folder: ${folder.name}/. ${warnings.join(" ")}`.trim(), warnings.length ? "darkorange" : "gray")
+        } catch (error) {
+          if (error.name !== "AbortError") say(`Could not open the folder: ${error.message}`, "crimson")
+        }
+      }
+
+      const write = async () => {
+        writeButton.disabled = true
+        for (const { name, box, note } of plan) {
+          if (!box.checked) continue
+          try {
+            const writable = await (await folder.getFileHandle(name, { create: true })).createWritable()
+            await writable.write(texts[name])
+            await writable.close()
+            note.textContent = "written"
+            note.style.color = "green"
+            box.checked = false
+          } catch (error) {
+            note.textContent = `not written: ${error.message}`
+            note.style.color = "crimson"
+          }
+        }
+        writeButton.disabled = false
+      }
+
+      choose.onclick = () => check(true)
+      writeButton.onclick = write
+      return html`<div>${choose}${writeButton}${status}${table}</div>`
+    }
+
+    // The downloads, for a browser that cannot save to a folder (or to
+    // save elsewhere).
+    const links = Object.entries(texts).map(([name, text]) => {
+      const url = URL.createObjectURL(new Blob([text], { type: "application/json" }))
+      invalidation.then(() => URL.revokeObjectURL(url))
+      return html`<a href="${url}" download="${name}">${name}</a>`
+    })
+    display(saver())
+    display(html`<p>Or download: ${links.flatMap((a, i) => (i ? [" · ", a] : [a]))}</p>`)
+  </script>
+  <script id="2861" type="module" pinned="">
+    const layout = mapParaSpels(spanned)
+    const spels = layout.spels
+  </script>
+  <script id="5875" type="module" pinned="">
+    // paragraph name -> array of spel ids; names come from the markup
+    // (para:name) or are para1, para2, ...
+    const paras = layout.para
+    // the paragraphs as an array of arrays of spel ids, in text order:
+    // the shape the player's paras.json has
+    const paraList = layout.order.para.map((name) => paras[name])
+  </script>
+  <script id="16" type="text/html" pinned="" output="css">
+    <style>
+
+      /* config.fontFamily ('Source Serif 4') is loaded from Google
+         Fonts by the fontReady cell. */
+      html {
+        margin: 2vw;
+      }
+
+      /* The type (family, size, weight, line height, ligatures,
+         optical size) and the fade times (--fade-in, --fade-out,
+         --field-fade) come from the config through the engine's
+         typeCss, so the player, which calls typeCss with its own
+         selector, has the same. */
+      ${typeCss(config, ".set")}
+
+      .set {
+        white-space: pre;
+        position: relative;
+      }
+
+      /* Rule drawn by addSpansTo between ofld's (display only,
+         not measured). */
+      .ofld-rule {
+        border: 0;
+        border-top: 1px solid gray;
+        height: 0;
+        margin-bottom: 0.4em;
+      }
+
+      .spel {
+        position: absolute;
+        opacity: 0;
+        transition: all var(--fade-out, 1.3s) ease-in-out;
+      }
+
+      .spel.visible {
+        opacity: 1;
+        transition: all var(--fade-in, 1.3s) ease-in-out;
+      }
+
+      /* With charFades each spel is split into .char spans (the
+         engine's splitIntoChars), which carry the fade. */
+      .char {
+        opacity: 0;
+        transition: all var(--fade-out, 1.3s) ease-in-out;
+      }
+
+      .char.visible {
+        opacity: 1;
+        transition: all var(--fade-in, 1.3s) ease-in-out;
+      }
+
+      /* An "effect" other than "visible" in a score's settings
+         (see Playback in scoring-template.html) is a class the
+         page defines. This one lights up text that is already
+         visible. */
+      .glow {
+        color: lemonchiffon;
+        text-shadow: 0 -0.3ch 0.5ch white, 0 0.3ch 0.5ch white,
+          0 -0.6ch 1ch white, 0 0.6ch 1ch white;
+      }
+
+    </style>
+  </script>
+  <script id="4309" type="text/markdown">
+    ---
+    ### Machinery
+    The cells below measure the galley and need no editing.
+  </script>
+  <script id="582" type="module" pinned="">
+    // `galley` tracks the element with id="galley" (defined in the
+    // separate HTML cell). It emits only once the element exists, and
+    // emits again whenever the HTML cell re-renders and produces a new
+    // node, so dependent cells always see a live element.
+    const galley = Generators.observe((notify) => {
+      let current = null;
+      const check = () => {
+        const el = document.getElementById("galley");
+        if (el && el !== current) notify((current = el));
+      };
+      const observer = new MutationObserver(check);
+      observer.observe(document.body, {childList: true, subtree: true});
+      check();
+      invalidation.then(() => observer.disconnect());
+    });
+  </script>
+  <script id="4219" type="module" pinned="">
+    // fonts must be loaded before anything is measured (see fontReady),
+    // including the subsets that this galley's own characters need
+    await fontReady
+    await Promise.all(faces.map((f) =>
+      document.fonts.load(`${f}16px "${fontFamily}"`, galley.textContent)))
+    const spanned = addSpansTo(galley)
+  </script>
+  <script id="4401" type="module" pinned="">
+    // Measures the spanned galley and groups its spels by the markup's
+    // containment. Returns { text, spels: Map(id -> spel), order, para,
+    // clmn, ofld, sctn, chpt } where each of the last five is { name:
+    // [spel ids in text order] } and order is { para: [names in text
+    // order], clmn: [...], ... }.
+    const mapParaSpels = (spanned) => {
+      const spels = new Map();
+      const groups = { para: {}, clmn: {}, ofld: {}, sctn: {}, chpt: {} };
+      // names in text order: an object's keys are not (integer-like
+      // names such as "2" and "10" sort first)
+      const order = Object.fromEntries(Object.keys(groups).map((k) => [k, []]));
+      for (const spel of getSpelArray(spanned)) {
+        spels.set(spel.id, spel);
+        for (const kind of Object.keys(groups))
+          if (spel[kind]) {
+            if (!(spel[kind] in groups[kind])) order[kind].push(spel[kind]);
+            (groups[kind][spel[kind]] ??= []).push(spel.id);
+          }
+      }
+      return { text: spanned.parsed.text, spels, order, ...groups };
+    }
+  </script>
+  <script id="844" type="module" pinned="">
+    // Builds the array of spel objects from the output of addSpansTo():
+    // { elem, parsed, cont }. leftvw/topvw/widthvw/heightvw are the
+    // BOUNDING BOX of the spel's rendered span in vw, relative to its
+    // container (ink is not measured: glyph overhangs are the font's
+    // business, and are dealt with only if a piece needs them):
+    //   - top: 0 is the top of the top-most spel box of the spel's ofld
+    //     (the whole galley is one ofld, called "galley", when the
+    //     markup names none); a clmn starts again at 0, so a spel's top
+    //     is its distance from the top of its own clmn
+    //   - left: the box's distance from the galley's left edge, plus
+    //     the offset of the spel's clmn (config.clmnRight for a clmn
+    //     named "right", otherwise 0)
+    // html is an absolutely positioned span that renders the spel at
+    // exactly leftvw/topvw. It carries white-space:pre (so the spel's
+    // own spaces and line breaks are kept wherever it is played) and,
+    // for a spel of several lines, text-indent (indentvw: how far its
+    // first line starts to the right of the box's left edge, so the
+    // lines fall where they do in the galley). Spels keep their inner
+    // markup.
+    const r3 = (x) => Math.round(x * 1000) / 1000;
+    // Slug of a spel's text, for its id: lowercase, accents folded (é
+    // -> e), apostrophes and quotes dropped (Cobbett’s -> cobbetts),
+    // any other run of characters that are not letters or digits
+    // (spaces, punctuation, line breaks: a multi-word spel is one slug)
+    // becomes one hyphen, none at the ends. Letters of any script are
+    // kept, so a non-Latin spel doesn't slug to nothing.
+    const slugify = (text) =>
+      text.normalize("NFD").replace(/\p{M}/gu, "").toLowerCase()
+        .replace(/['\u2018\u2019\u201c\u201d"`]/g, "")
+        .replace(/[^\p{L}\p{N}]+/gu, "-").replace(/^-|-$/g, "");
+    const clmnOffset = (name) => (name === "right" ? config.clmnRight : 0);
+
+    // Box of one spel span (px, relative to the container's top left),
+    // as an absolutely positioned (blockified) copy of the span would
+    // have it.
+    const measureSpel = (span, boxRect, ctx) => {
+      const cs = getComputedStyle(span);
+      ctx.font = `${cs.fontStyle} ${cs.fontWeight} ${cs.fontSize} ${cs.fontFamily}`;
+      const strut = ctx.measureText("x");
+      const lh = parseFloat(cs.lineHeight); // NaN for "normal"
+      const halfLeading = Number.isNaN(lh)
+        ? 0
+        : (lh - (strut.fontBoundingBoxAscent + strut.fontBoundingBoxDescent)) / 2;
+      // one per line of a multi-line spel
+      const rects = Array.from(span.getClientRects());
+      const left = Math.min(...rects.map((r) => r.left));
+      const right = Math.max(...rects.map((r) => r.right));
+      // the inline box sits half the leading below the block's top
+      const top = rects[0].top - halfLeading;
+      const bottom = rects[rects.length - 1].bottom + halfLeading;
+      // indent: where the first line starts, from the box's left edge
+      // (later lines start at the edge)
+      return { left: left - boxRect.left, top: top - boxRect.top, width: right - left, height: bottom - top, indent: rects[0].left - left };
+    };
+
+    // Boxes (px) of all the spel spans of a spanned element, in order.
+    // A copy is measured in a hidden, attached host (offsets need a
+    // rendered element); the spans are positioned by vw font sizes, so
+    // the host's width doesn't matter. The copy has no ofld rules, so
+    // vertical positions are those of the unbroken text, "virtually".
+    const measureBoxes = (elem) => {
+      const host = document.createElement("div");
+      host.style.cssText = "position:absolute;left:0;top:0;visibility:hidden;pointer-events:none";
+      const box = elem.cloneNode(true);
+      box.querySelectorAll(".ofld-rule").forEach((hr) => hr.remove());
+      host.append(box);
+      document.body.append(host);
+      try {
+        const ctx = document.createElement("canvas").getContext("2d");
+        const boxRect = box.getBoundingClientRect();
+        return Array.from(box.querySelectorAll("span.spelm"), (span) => measureSpel(span, boxRect, ctx));
+      } finally {
+        host.remove();
+      }
+    };
+
+    const getSpelArray = (spanned) => {
+      const { elem, parsed, cont } = spanned;
+      // addSpansTo has already moved every clmn up to the top of its
+      // ofld, so these are actual
+      const measured = measureBoxes(elem);
+      // inner markup of each spel (rich markup survives; stray markup
+      // comments don't)
+      const comments = new RegExp("<!" + "--[\\s\\S]*?--" + ">", "g");
+      // and the elements that enclose it in the galley (e.g. <em>),
+      // cloned around it
+      const inners = Array.from(elem.querySelectorAll("span.spelm"), (s) => {
+        let inner = s.innerHTML.replace(comments, "");
+        for (let a = s.parentElement; a && a !== elem; a = a.parentElement) {
+          // display wrapper, not the spel's markup
+          if (a.classList.contains("clmn-lift")) continue;
+          const tag = a.cloneNode(false).outerHTML;
+          inner = tag.slice(0, tag.lastIndexOf("</")) + inner + tag.slice(tag.lastIndexOf("</"));
+        }
+        return inner;
+      });
+      const spels = parsed.spel.map((p, i) => ({ ...p, ...cont[i], ofld: cont[i].ofld ?? "galley" }));
+      // ofld origins: the top of each ofld's top-most box (each clmn's
+      // top-most box is already there)
+      const origin = new Map();
+      spels.forEach((s, i) => origin.set(s.ofld, Math.min(origin.get(s.ofld) ?? Infinity, measured[i].top)));
+      return spels.map((s, i) => {
+        const m = measured[i];
+        // slug-number; the number keeps ids unique. An id that would
+        // start with a digit (a spel like "1984", or one with no
+        // letters at all) gets "s-" so it can be used as #id in css
+        const base = [slugify(s.text), i].filter((x) => x !== "").join("-");
+        const id = /^\d/.test(base) ? `s-${base}` : base;
+        // actual: addSpansTo already offset the clmn
+        const leftvw = r3(pxToVw(m.left));
+        const topvw = r3(pxToVw(m.top - origin.get(s.ofld)));
+        const indentvw = r3(pxToVw(m.indent));
+        const inner = inners[i];
+        const attr = id.replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;");
+        return {
+          id, index: i, string: s.text, start: s.start, end: s.end, implicit: !!s.implicit,
+          para: s.para, clmn: s.clmn, ofld: s.ofld, sctn: s.sctn, chpt: s.chpt,
+          leftvw, topvw, widthvw: r3(pxToVw(m.width)), heightvw: r3(pxToVw(m.height)), indentvw,
+          html: `<span id="${attr}" class="spel" style="left:${leftvw}vw;top:${topvw}vw;white-space:pre${indentvw ? `;text-indent:${indentvw}vw` : ""}">${inner}</span>`
+        };
+      });
+    }
+  </script>
+  <script id="974" type="module" pinned="">
+    // Wraps the text range [start, end) (character offsets into the
+    // element's text, comments excluded, as parseMarkup counts them) in
+    // <span class="spelm" data-i="i">. The range may cross element
+    // boundaries: partly covered elements are split, so rich markup is
+    // kept.
+    const wrapSpel = (root, start, end, i, style = "") => {
+      const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+      let pos = 0, sNode, sOff, eNode, eOff;
+      while (walker.nextNode()) {
+        const n = walker.currentNode, len = n.data.length;
+        if (!sNode && start < pos + len) { sNode = n; sOff = start - pos; }
+        if (sNode && end <= pos + len) { eNode = n; eOff = end - pos; break; }
+        pos += len;
+      }
+      if (!eNode) throw new Error(`Spel ${i} [${start}, ${end}) not found in the text`);
+      const range = document.createRange();
+      range.setStart(sNode, sOff);
+      range.setEnd(eNode, eOff);
+      const span = document.createElement("span");
+      span.className = "spelm";
+      span.dataset.i = i;
+      if (style) span.style.cssText = style;
+      span.append(range.extractContents());
+      range.insertNode(span);
+    };
+
+    // Wraps the text range [start, end) in `wrapper` (an element). Like
+    // wrapSpel, but a boundary that falls at the edge of a spel span
+    // goes outside it, so spels are never split.
+    const wrapRange = (root, start, end, wrapper) => {
+      const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+      let pos = 0, sNode, sOff, eNode, eOff;
+      while (walker.nextNode()) {
+        const n = walker.currentNode, len = n.data.length;
+        if (!sNode && start < pos + len) { sNode = n; sOff = start - pos; }
+        if (sNode && end <= pos + len) { eNode = n; eOff = end - pos; break; }
+        pos += len;
+      }
+      if (!eNode) throw new Error(`Range [${start}, ${end}) not found in the text`);
+      // first or last text node of a spel span
+      const textEnd = (spel, first) => {
+        const w = document.createTreeWalker(spel, NodeFilter.SHOW_TEXT);
+        let node = null;
+        while (w.nextNode()) { node = w.currentNode; if (first) break; }
+        return node;
+      };
+      const range = document.createRange();
+      const sSpel = sNode.parentElement.closest("span.spelm");
+      const eSpel = eNode.parentElement.closest("span.spelm");
+      if (sSpel && sOff === 0 && textEnd(sSpel, true) === sNode) range.setStartBefore(sSpel);
+      else range.setStart(sNode, sOff);
+      if (eSpel && eOff === eNode.data.length && textEnd(eSpel, false) === eNode) range.setEndAfter(eSpel);
+      else range.setEnd(eNode, eOff);
+      wrapper.append(range.extractContents());
+      range.insertNode(wrapper);
+    };
+
+    // Inserts `node` at character offset `offset` of the element's text
+    // (between text nodes).
+    const insertAtOffset = (root, offset, node) => {
+      const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+      let pos = 0;
+      while (walker.nextNode()) {
+        const n = walker.currentNode;
+        if (offset < pos + n.data.length) {
+          const range = document.createRange();
+          range.setStart(n, offset - pos);
+          range.collapse(true);
+          return range.insertNode(node);
+        }
+        pos += n.data.length;
+      }
+      root.append(node);
+    };
+
+    // Takes the galley element (an element of class "set" holding text
+    // and <!--@ ... --> markup) and returns { elem, parsed, cont }:
+    // parsed is parseMarkup's result for the galley, cont is its
+    // containment, and elem is a copy of the galley for display, in
+    // which
+    //   - every spel, explicit or implicit, is wrapped in <span
+    //     class="spelm">;
+    //   - spels in a clmn are really offset, by config.clmnRight for
+    //     clmn:right (so their horizontal measurements are actual
+    //     ones);
+    //   - each clmn is moved up (in an absolutely positioned wrapper,
+    //     so no blank space is left) until its top-most spel box is
+    //     level with the top of its ofld: like an ofld, a clmn starts
+    //     again at 0. The spels' vertical measurements, taken from this
+    //     element, are therefore actual ones;
+    //   - every ofld after the first is preceded by <hr
+    //     class="ofld-rule">. The rules are for the maker only:
+    //     getSpelArray measures without them, so that vertical
+    //     positions stay "virtual" (each ofld measured from the top of
+    //     its top-most spel box).
+    const addSpansTo = (galleyElem) => {
+      const parsed = parseMarkup(galleyElem);
+      const cont = containment(parsed);
+      const elem = galleyElem.cloneNode(true);
+      elem.removeAttribute("id");
+      // rules first: they only split text nodes, never change the text
+      parsed.ofld.filter((o) => parsed.spel.length && o.start > parsed.spel[0].start).forEach((o) => {
+        const hr = document.createElement("hr");
+        hr.className = "ofld-rule";
+        insertAtOffset(elem, o.start, hr);
+      });
+      parsed.spel.forEach((s, i) => {
+        const shift = clmnOffset(cont[i].clmn);
+        wrapSpel(elem, s.start, s.end, i, shift ? `position:relative;left:${shift}vw` : "");
+      });
+      // a new clmn resets the top, as a new ofld does: measure the
+      // unshifted text, then lift each clmn by the distance between its
+      // own top and that of its ofld. The lifted clmn is wrapped in an
+      // absolutely positioned <div class="clmn-lift">, so it leaves the
+      // flow and leaves no blank lines behind (its lines still break as
+      // before; it is anchored at the left edge of the galley).
+      const boxes = measureBoxes(elem);
+      const ofldTop = new Map();
+      cont.forEach((c, i) => {
+        const o = c.ofld ?? "galley";
+        ofldTop.set(o, Math.min(ofldTop.get(o) ?? Infinity, boxes[i].top));
+      });
+      const lifts = parsed.clmn.map((e, j) => {
+        const key = e.name ?? `clmn${j + 1}`;
+        const mine = cont.map((c, i) => i).filter((i) => cont[i].clmn === key
+          && parsed.spel[i].start >= e.start && parsed.spel[i].end <= e.end);
+        if (!mine.length) return { e, lift: 0 };
+        const top = Math.min(...mine.map((i) => boxes[i].top));
+        return { e, lift: top - ofldTop.get(cont[mine[0]].ofld ?? "galley") };
+      });
+      lifts.filter(({ lift }) => lift > 0).sort((a, b) => a.e.start - b.e.start || b.e.end - a.e.end)
+        .forEach(({ e, lift }) => {
+          const div = document.createElement("div");
+          div.className = "clmn-lift";
+          div.style.cssText = `position:absolute;left:0;margin-top:${-r3(pxToVw(lift))}vw`;
+          wrapRange(elem, e.start, e.end, div);
+        });
+      return { elem, parsed, cont };
+    }
+  </script>
+  <script id="5881" type="module" pinned="">
+    // Markup syntax: <!--@ token token ... -->
+    //   open:  kind or kind:name   e.g. para, clmn:left
+    //   close: /kind               e.g. /para
+    // kinds: spel, para, clmn, ofld, sctn, chpt
+    // Several tokens may share a comment, so boundaries can coincide.
+    // Within one comment all closes are applied before all opens, so
+    // "/para para" ends one para and starts the next, whatever the
+    // order.
+    const markupKinds = ["spel", "para", "clmn", "ofld", "sctn", "chpt"];
+
+    const parseMarkup = (root) => {
+      const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT | NodeFilter.SHOW_COMMENT);
+      const open = Object.fromEntries(markupKinds.map((k) => [k, []]));
+      const ents = Object.fromEntries(markupKinds.map((k) => [k, []]));
+      let text = "";
+      while (walker.nextNode()) {
+        const n = walker.currentNode;
+        if (n.nodeType === Node.TEXT_NODE) { text += n.data; continue; }
+        if (!n.data.startsWith("@")) continue; // ordinary comment
+        const toks = n.data.slice(1).trim().split(/\s+/).filter(Boolean)
+          .map((t) => {
+            const m = t.match(/^(\/)?(\w+)(?::(.+))?$/);
+            if (!m || !markupKinds.includes(m[2])) throw new Error(`Bad markup token: ${t}`);
+            return { close: !!m[1], kind: m[2], name: m[3] };
+          })
+          .sort((a, b) => b.close - a.close); // closes first
+        for (const t of toks) {
+          if (t.close) {
+            const o = open[t.kind].pop();
+            if (!o) throw new Error(`Unmatched /${t.kind} at offset ${text.length}`);
+            ents[t.kind].push({ kind: t.kind, name: o.name, start: o.start, end: text.length, text: text.slice(o.start, text.length) });
+          } else open[t.kind].push({ name: t.name, start: text.length });
+        }
+      }
+      for (const k of markupKinds) if (open[k].length) throw new Error(`Unclosed ${k}`);
+
+      // implicit spels: runs of non-space outside explicit spels
+      const explicit = ents.spel.sort((a, b) => a.start - b.start);
+      const all = [...explicit];
+      let pos = 0;
+      const addGap = (from, to) => {
+        for (const m of text.slice(from, to).matchAll(/\S+/g))
+          all.push({ kind: "spel", start: from + m.index, end: from + m.index + m[0].length, text: m[0], implicit: true });
+      };
+      for (const s of explicit) { addGap(pos, s.start); pos = Math.max(pos, s.end); }
+      addGap(pos, text.length);
+      ents.spel = all.sort((a, b) => a.start - b.start || a.end - b.end);
+      for (const k of markupKinds) ents[k].sort((a, b) => a.start - b.start || a.end - b.end);
+      return { text, ...ents };
+    }
+  </script>
+  <script id="5890" type="module" pinned="">
+    // Containment: for every spel (in parsed.spel order) the innermost
+    // para, clmn, ofld, sctn and chpt whose range contains it, or null
+    // (except para: see below). Unnamed entities are called kind1,
+    // kind2, ... in text order (para1, para2, ...), so named and
+    // unnamed ones can be mixed.
+    const containment = (parsed) => {
+      const kinds = ["para", "clmn", "ofld", "sctn", "chpt"];
+      const keyed = Object.fromEntries(kinds.map((k) => [k, parsed[k].map((e, i) => ({ ...e, key: e.name ?? `${k}${i + 1}` }))]));
+      const innermost = (k, s) => keyed[k].reduce((best, e) =>
+        e.start <= s.start && s.end <= e.end && (!best || e.end - e.start <= best.end - best.start) ? e : best, null);
+      return parsed.spel.map((s) => {
+        const c = Object.fromEntries(kinds.map((k) => [k, innermost(k, s)?.key ?? null]));
+        // a spel outside every para is in its ofld's implicit para (an
+        // ofld with no para markup is one para, as a galley with no
+        // ofld markup is one ofld, "galley"): a score is always of a
+        // para
+        c.para ??= c.ofld ?? "galley";
+        return c;
+      });
+    }
+  </script>
+  <script id="1051" type="module">
+    // converts pixel measurements to the more flexible vw (viewport
+    // width) measurement of css
+    const pxToVw = (px) => px * (100 / vWidth)
+  </script>
+  <script id="5514" type="module" pinned="">
+    // The width in px of 100vw, asked of the browser itself (a probe
+    // element 100vw wide), so it is exactly what css vw means here,
+    // scrollbar and zoom included. It is read once: everything in the
+    // galley is sized in vw, so the recorded vw data does not depend on
+    // the window width.
+    const vWidth = (() => {
+      const probe = document.createElement("div");
+      probe.style.cssText = "position:absolute;visibility:hidden;width:100vw;height:0";
+      document.body.append(probe);
+      const w = probe.getBoundingClientRect().width;
+      probe.remove();
+      return w;
+    })()
+  </script>
+  <script id="5894" type="module" pinned="">
+    // The font comes from Google Fonts (network), not from a local()
+    // copy, so that everyone's measurements, and the player's, use the
+    // same font file. `fontReady` resolves once the stylesheet and the
+    // faces actually used are loaded; cells that measure text wait for
+    // it (see `spanned`).
+    const fontFamily = config.fontFamily
+    // the faces in use, as the start of a font shorthand: roman and
+    // italic, at config.fontWeight and bold
+    const faces = ["", "italic "].flatMap((s) => [config.fontWeight, 700].map((w) => `${s}${w} `))
+    const fontReady = (async () => {
+      const link = document.createElement("link");
+      link.rel = "stylesheet";
+      // a weight range, not a list: Source Serif 4 is a variable font,
+      // so any config.fontWeight works (built from config.fontFamily:
+      // it must be a Google font with a wght axis)
+      link.href = `https://fonts.googleapis.com/css2?family=${fontFamily.replace(/ /g, "+")}:ital,wght@0,200..900;1,200..900&display=swap`;
+      const loaded = new Promise((resolve, reject) => {
+        link.onload = resolve;
+        link.onerror = () => reject(new Error(`Could not load the stylesheet for ${fontFamily}: ${link.href}`));
+      });
+      document.head.append(link);
+      invalidation.then(() => link.remove());
+      await loaded;
+      // px, the safest unit in the font shorthand; the sample text
+      // covers the latin subset
+      const sample = "AaBbCcDdEeFfGg’'“”—…";
+      await Promise.all(faces.map((f) => document.fonts.load(`${f}16px "${fontFamily}"`, sample)));
+      await document.fonts.ready;
+      if (!document.fonts.check(`${config.fontWeight} 16px "${fontFamily}"`, sample))
+        throw new Error(`${fontFamily} did not load`);
+      return fontFamily;
+    })()
+  </script>
+</notebook>
