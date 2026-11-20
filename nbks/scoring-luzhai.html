@@ -11,8 +11,14 @@
     `nbks/data/luzhai/` (it asks before replacing a file; or download
     them and move them there). `luzhai.html` plays them. The template
     notebook documents the markup, the settings and playback.
+
+    Two things beyond the template: each Han character is a spel of
+    its own (with the punctuation after it), and
+    `<!--@ font:cursive -->` ... `<!--@ /font -->` sets the Google
+    font Liu Jian Mao Cao on the spels inside it (see `fonts` in the
+    `config` cell).
   </script>
-  <script id="3254" type="module" pinned="">
+  <script id="3254" type="module">
     // THE ENGINE, from GitHub through jsDelivr (raw.github-
     // usercontent.com serves text/plain, which browsers refuse as
     // a module). This is the one place the notebook names the
@@ -109,12 +115,20 @@
     //   last: { interFieldMs: 3500, interCycleMs: 8000 },
     // }
     const perScore = {}
+    // Fonts for marked spels. In the galley, <!--@ font:cursive -->
+    // ... <!--@ /font --> sets the family of every spel inside it,
+    // for measuring and in the exported spels. The name on the left
+    // is the one used in the markup; the family on the right is
+    // loaded from Google Fonts by custom.tmpl.
+    const fonts = {
+      cursive: "Liu Jian Mao Cao",
+    }
   </script>
   <script id="5891" type="text/html" pinned="">
-    <div id="galley" class="set"><!--@ ofld -->first line of the translation
-              second line, indented
-    third line
-              fourth line<!--@ /ofld --></div>
+    <div id="galley" class="set"><!--@ ofld -->空山不见人
+    但闻人语响
+    返景入深林
+    复照青苔上<!--@ /ofld --></div>
   </script>
   <script id="5895" type="text/html">
     <!-- The spanned galley as the maker sees it: clmn:right really
@@ -122,12 +136,12 @@
          spans, minus the rules, are measured for the spel data. -->
     <div>${spanned.elem}</div>
   </script>
-  <script id="5749" type="module" pinned="">
+  <script id="5749" type="module">
     // The reading-time estimators come from the engine (see `engine`
     // above). They return milliseconds.
     const { spelTime } = await import(`${engine}/timetoread.js`)
   </script>
-  <script id="5741" type="module" pinned="">
+  <script id="5741" type="module">
     // one score (array of { id, duration }) per para, in text order. A
     // spel's duration (ms) is spelTime: the time to read it (the
     // whitespace inside a multi-word spel counts) plus the whitespace
@@ -729,7 +743,7 @@
         linearMs: scores[p][k].duration, performedMs: duration
       }))), { rows: 12 }))
   </script>
-  <script id="6003" type="module" pinned="">
+  <script id="6003" type="module">
     // Export: the files the player reads, in the shape its pages read
     // them. Save them into the poem's nbks/data/luzhai/, or download
     // them and move them there. config.json is the whole config
@@ -915,11 +929,11 @@
     display(saver())
     display(html`<p>Or download: ${links.flatMap((a, i) => (i ? [" · ", a] : [a]))}</p>`)
   </script>
-  <script id="2861" type="module" pinned="">
+  <script id="2861" type="module">
     const layout = mapParaSpels(spanned)
     const spels = layout.spels
   </script>
-  <script id="5875" type="module" pinned="">
+  <script id="5875" type="module">
     // paragraph name -> array of spel ids; names come from the markup
     // (para:name) or are para1, para2, ...
     const paras = layout.para
@@ -997,7 +1011,7 @@
     ### Machinery
     The cells below measure the galley and need no editing.
   </script>
-  <script id="582" type="module" pinned="">
+  <script id="582" type="module">
     // `galley` tracks the element with id="galley" (defined in the
     // separate HTML cell). It emits only once the element exists, and
     // emits again whenever the HTML cell re-renders and produces a new
@@ -1014,15 +1028,18 @@
       invalidation.then(() => observer.disconnect());
     });
   </script>
-  <script id="4219" type="module" pinned="">
+  <script id="4219" type="module">
     // fonts must be loaded before anything is measured (see fontReady),
     // including the subsets that this galley's own characters need
     await fontReady
     await Promise.all(faces.map((f) =>
       document.fonts.load(`${f}16px "${fontFamily}"`, galley.textContent)))
+    // and the marked fonts (custom.tmpl links their stylesheets)
+    await Promise.all(Object.values(fonts).map((family) =>
+      document.fonts.load(`16px "${family}"`, galley.textContent)))
     const spanned = addSpansTo(galley)
   </script>
-  <script id="4401" type="module" pinned="">
+  <script id="4401" type="module">
     // Measures the spanned galley and groups its spels by the markup's
     // containment. Returns { text, spels: Map(id -> spel), order, para,
     // clmn, ofld, sctn, chpt } where each of the last five is { name:
@@ -1045,7 +1062,7 @@
       return { text: spanned.parsed.text, spels, order, ...groups };
     }
   </script>
-  <script id="844" type="module" pinned="">
+  <script id="844" type="module">
     // Builds the array of spel objects from the output of addSpansTo():
     // { elem, parsed, cont }. leftvw/topvw/widthvw/heightvw are the
     // BOUNDING BOX of the spel's rendered span in vw, relative to its
@@ -1162,14 +1179,14 @@
         const attr = id.replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;");
         return {
           id, index: i, string: s.text, start: s.start, end: s.end, implicit: !!s.implicit,
-          para: s.para, clmn: s.clmn, ofld: s.ofld, sctn: s.sctn, chpt: s.chpt,
+          para: s.para, clmn: s.clmn, ofld: s.ofld, sctn: s.sctn, chpt: s.chpt, font: s.font,
           leftvw, topvw, widthvw: r3(pxToVw(m.width)), heightvw: r3(pxToVw(m.height)), indentvw,
-          html: `<span id="${attr}" class="spel" style="left:${leftvw}vw;top:${topvw}vw;white-space:pre${indentvw ? `;text-indent:${indentvw}vw` : ""}">${inner}</span>`
+          html: `<span id="${attr}" class="spel" style="left:${leftvw}vw;top:${topvw}vw;white-space:pre${indentvw ? `;text-indent:${indentvw}vw` : ""}${s.font ? `;font-family:${fontCss(s.font)}` : ""}">${inner}</span>`
         };
       });
     }
   </script>
-  <script id="974" type="module" pinned="">
+  <script id="974" type="module">
     // Wraps the text range [start, end) (character offsets into the
     // element's text, comments excluded, as parseMarkup counts them) in
     // <span class="spelm" data-i="i">. The range may cross element
@@ -1278,7 +1295,9 @@
       });
       parsed.spel.forEach((s, i) => {
         const shift = clmnOffset(cont[i].clmn);
-        wrapSpel(elem, s.start, s.end, i, shift ? `position:relative;left:${shift}vw` : "");
+        const family = fontCss(cont[i].font);
+        const style = [shift ? `position:relative;left:${shift}vw` : "", family ? `font-family:${family}` : ""];
+        wrapSpel(elem, s.start, s.end, i, style.filter(Boolean).join(";"));
       });
       // a new clmn resets the top, as a new ofld does: measure the
       // unshifted text, then lift each clmn by the distance between its
@@ -1310,16 +1329,17 @@
       return { elem, parsed, cont };
     }
   </script>
-  <script id="5881" type="module" pinned="">
+  <script id="5881" type="module">
     // Markup syntax: <!--@ token token ... -->
     //   open:  kind or kind:name   e.g. para, clmn:left
     //   close: /kind               e.g. /para
-    // kinds: spel, para, clmn, ofld, sctn, chpt
+    // kinds: spel, para, clmn, ofld, sctn, chpt, font
+    // (font:name takes the name of a font in `fonts`, config cell)
     // Several tokens may share a comment, so boundaries can coincide.
     // Within one comment all closes are applied before all opens, so
     // "/para para" ends one para and starts the next, whatever the
     // order.
-    const markupKinds = ["spel", "para", "clmn", "ofld", "sctn", "chpt"];
+    const markupKinds = ["spel", "para", "clmn", "ofld", "sctn", "chpt", "font"];
 
     const parseMarkup = (root) => {
       const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT | NodeFilter.SHOW_COMMENT);
@@ -1347,12 +1367,18 @@
       }
       for (const k of markupKinds) if (open[k].length) throw new Error(`Unclosed ${k}`);
 
-      // implicit spels: runs of non-space outside explicit spels
+      // implicit spels: outside explicit spels, each Han character is
+      // a spel (with the punctuation that follows it and the opening
+      // quote or bracket that precedes it); anything else is a run of
+      // non-space, a word
       const explicit = ents.spel.sort((a, b) => a.start - b.start);
       const all = [...explicit];
       let pos = 0;
+      const OPEN = "「『（《〈“‘";
+      const CLOSE = "，。、；：？！…—～·」』）》〉”’.,;:?!)\\]";
+      const implicit = new RegExp(`[${OPEN}]*\\p{Script=Han}[${CLOSE}]*|(?:(?![${OPEN}]+\\p{Script=Han})[^\\s\\p{Script=Han}])+`, "gu");
       const addGap = (from, to) => {
-        for (const m of text.slice(from, to).matchAll(/\S+/g))
+        for (const m of text.slice(from, to).matchAll(implicit))
           all.push({ kind: "spel", start: from + m.index, end: from + m.index + m[0].length, text: m[0], implicit: true });
       };
       for (const s of explicit) { addGap(pos, s.start); pos = Math.max(pos, s.end); }
@@ -1362,14 +1388,15 @@
       return { text, ...ents };
     }
   </script>
-  <script id="5890" type="module" pinned="">
+  <script id="5890" type="module">
     // Containment: for every spel (in parsed.spel order) the innermost
-    // para, clmn, ofld, sctn and chpt whose range contains it, or null
-    // (except para: see below). Unnamed entities are called kind1,
-    // kind2, ... in text order (para1, para2, ...), so named and
-    // unnamed ones can be mixed.
+    // para, clmn, ofld, sctn, chpt and font whose range contains it,
+    // or null (except para: see below). Unnamed entities are called
+    // kind1, kind2, ... in text order (para1, para2, ...), so named
+    // and unnamed ones can be mixed. A font must be named, and be one
+    // of `fonts` (config cell).
     const containment = (parsed) => {
-      const kinds = ["para", "clmn", "ofld", "sctn", "chpt"];
+      const kinds = ["para", "clmn", "ofld", "sctn", "chpt", "font"];
       const keyed = Object.fromEntries(kinds.map((k) => [k, parsed[k].map((e, i) => ({ ...e, key: e.name ?? `${k}${i + 1}` }))]));
       const innermost = (k, s) => keyed[k].reduce((best, e) =>
         e.start <= s.start && s.end <= e.end && (!best || e.end - e.start <= best.end - best.start) ? e : best, null);
@@ -1380,16 +1407,22 @@
         // ofld markup is one ofld, "galley"): a score is always of a
         // para
         c.para ??= c.ofld ?? "galley";
+        if (c.font !== null && !(c.font in fonts))
+          throw new Error(`Unknown font "${c.font}" in the markup (fonts: ${Object.keys(fonts).join(", ")})`);
         return c;
       });
     }
+
+    // The CSS font-family value of a font name ("" for none). Single
+    // quotes, so it can sit inside a style="..." attribute.
+    const fontCss = (name) => (name ? `'${fonts[name]}', serif` : "")
   </script>
   <script id="1051" type="module">
     // converts pixel measurements to the more flexible vw (viewport
     // width) measurement of css
     const pxToVw = (px) => px * (100 / vWidth)
   </script>
-  <script id="5514" type="module" pinned="">
+  <script id="5514" type="module">
     // The width in px of 100vw, asked of the browser itself (a probe
     // element 100vw wide), so it is exactly what css vw means here,
     // scrollbar and zoom included. It is read once: everything in the
@@ -1404,7 +1437,7 @@
       return w;
     })()
   </script>
-  <script id="5894" type="module" pinned="">
+  <script id="5894" type="module">
     // The font comes from Google Fonts (network), not from a local()
     // copy, so that everyone's measurements, and the player's, use the
     // same font file. `fontReady` resolves once the stylesheet and the

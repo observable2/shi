@@ -60,6 +60,16 @@ rules per unit and the field's position. The scoring notebook loads the
 engine from jsDelivr (`@v0.15.0`, the one place to change when moving to a
 new release), the page from npm like the others.
 
+**Chinese and the cursive font.** In the notebook each Han character
+is a spel of its own (with the punctuation after it), so a line of
+characters is animated character by character. Spels can use the
+Google font Liu Jian Mao Cao: wrap them in
+`<!--@ font:cursive --> ... <!--@ /font -->` in the galley (the names
+are in the `fonts` table in the `config` cell). The notebook measures
+them in that font, and the exported spels carry it in their `html`.
+`custom.tmpl` links the font from Google Fonts for every page in this
+project; the browser fetches only the slices of characters used.
+
 ## What came from where
 
 - `mapleBridge.md`, `riverSnow.md`, `treadingVoid.md` (Framework

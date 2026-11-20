@@ -56,6 +56,12 @@
     const paras = await FileAttachment("./data/luzhai/paras.json").json();
     const scores = await FileAttachment("./data/luzhai/scores.json").json();
     const measuredWith = await FileAttachment("./data/luzhai/measured.json").json();
+    // Spels marked with the cursive font carry it in their html (see
+    // `fonts` in scoring-luzhai.html); custom.tmpl links the font. Fetch
+    // the slices these characters need before they appear.
+    const marked = Array.from(spels.values()).filter((s) => s.font);
+    if (marked.length)
+      await document.fonts.load('16px "Liu Jian Mao Cao"', marked.map((s) => s.string).join(""));
     // Puts the spels in the field (split into characters if
     // config.charFades) and warns in the console if the type differs
     // from the type they were measured in. The page's grid places
