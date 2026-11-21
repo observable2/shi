@@ -22,29 +22,39 @@
          (family "Source Serif 4 Variable") */
       @import url("@fontsource-variable/source-serif-4/opsz.css");
       @import url("@fontsource-variable/source-serif-4/opsz-italic.css");
+      /* The page rules below (black stage, no cursor, no margins,
+         full-width main) apply to every page except a scoring
+         notebook, which contains the element #galley (scoring-
+         luzhai.html): that keeps the kit's chrome and its own
+         notebook theme (air). :where() keeps these rules at the
+         specificity they would have without the scope, so a page's
+         own <style> can still override them. */
+
       /* padding and borders count inside an element's width and
          height, so width:100% plus padding does not overflow */
-      *, *::before, *::after {
+      :where(html:not(:has(#galley))) *,
+      :where(html:not(:has(#galley))) *::before,
+      :where(html:not(:has(#galley))) *::after {
         box-sizing: border-box;
       }
       /* no top margin on any element but html (set below) */
-      *:not(html) {
+      :where(html:not(:has(#galley))) :not(html) {
         margin-top:0 !important;
       }
       /* Observable gives every cell's wrapper div a margin (17px 0).
          Each page has at most one visible content cell, so the
          margin is removed everywhere; targeting only empty or
          hidden cells with :empty is fragile. */
-      .observablehq--cell {
+      :where(html:not(:has(#galley))) .observablehq--cell {
         margin: 0;
       }
-      html {
+      html:where(:not(:has(#galley))) {
         background-color: black;
         margin:0;
         padding:0;
         border:0;
       }
-      body {
+      :where(html:not(:has(#galley))) body {
         background-color: black;
         color: floralwhite;
         cursor: none;
@@ -53,7 +63,7 @@
         padding:0;
         border:0;
       }
-      main {
+      :where(html:not(:has(#galley))) main {
         /* background-color: red; */
         max-width: none;
         margin:0;
