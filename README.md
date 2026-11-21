@@ -70,6 +70,16 @@ them in that font, and the exported spels carry it in their `html`.
 `custom.tmpl` links the font from Google Fonts for every page in this
 project; the browser fetches only the slices of characters used.
 
+**Timing Chinese.** The notebook's linear scores time each Han character
+by the letters of its pinyin (about 450 ms a syllable, 1.8 to 2 s for a
+five-character line), using the 10 KB tiny-pinyin library from jsDelivr
+when the galley has Han characters. It is a first model, to be revisited:
+tiny-pinyin has one reading per character, letters are a rough stand-in
+for syllable length, and nothing is calibrated. The options (pinyin-pro,
+a per-syllable constant, fitting to a recording) are in the engine's
+README, "Reading Chinese". It needs engine 0.16.0 or later; an older
+engine times a character as one letter.
+
 ## What came from where
 
 - `mapleBridge.md`, `riverSnow.md`, `treadingVoid.md` (Framework
