@@ -1,7 +1,7 @@
 <!doctype html>
 <notebook theme="air">
   <title>Scoring Luzhai</title>
-  <script id="1" type="text/markdown">
+  <script id="0" type="text/markdown">
     # Scoring Luzhai
     #### *Luzhai*, translated by John Cayley
     Working notebook for this poem, made from the Scoring Template
@@ -18,7 +18,7 @@
     font Liu Jian Mao Cao on the spels inside it (see `fonts` in the
     `config` cell).
   </script>
-  <script id="3254" type="module">
+  <script id="1" type="module">
     // THE ENGINE, from GitHub through jsDelivr (raw.github-
     // usercontent.com serves text/plain, which browsers refuse as
     // a module). This is the one place the notebook names the
@@ -124,7 +124,7 @@
       cursive: "Liu Jian Mao Cao",
     }
   </script>
-  <script id="5891" type="text/html" pinned="">
+  <script id="2" type="text/html" pinned="">
     <div id="galley" class="set"><!--@ ofld clmn:left font:cursive -->景空
     入山
     深不
@@ -136,28 +136,27 @@
     上语
         响
         返
-    <!--@ /font /clmn clmn:right -->alone
-    hearing voices
-       of something past
-    echoes ?
+    <!--@ /font /clmn clmn:right -->Am I alone ?
+    I seem to hear your voice …
+         — or echo ?
 
-    where the mossbank
-    shines
-    as it did
-              before
+    I point out, as if to you,
+         the ancient light
+       which makes the mosses glow
 
-    returning
-    each evening
-    to this lakeside
-    through the deep woods<!--@ /clmn /ofld --></div>
+       so we return
+       each evening
+       to this hillside
+       through the deep wood
+    <!--@ /clmn /ofld --></div>
   </script>
-  <script id="5895" type="text/html">
+  <script id="3" type="text/html">
     <!-- The spanned galley as the maker sees it: clmn:right really
          offset by config.clmnRight, a rule between ofld's. The same
          spans, minus the rules, are measured for the spel data. -->
     <div>${spanned.elem}</div>
   </script>
-  <script id="5749" type="module">
+  <script id="4" type="module">
     // The reading-time estimators come from the engine (see `engine`
     // above). They return milliseconds.
     const { spelTime } = await import(`${engine}/timetoread.js`)
@@ -176,7 +175,7 @@
       }
     }
   </script>
-  <script id="5741" type="module">
+  <script id="5" type="module">
     // one score (array of { id, duration }) per para, in text order. A
     // spel's duration (ms) is spelTime: the time to read it (the
     // whitespace inside a multi-word spel counts) plus the whitespace
@@ -196,7 +195,7 @@
         return { id, duration: spelTime(spel.string, gap, 1, readOptions) };
       }))
   </script>
-  <script id="7001" type="text/markdown">
+  <script id="6" type="text/markdown">
     ---
     ### Performance: timing the scores from a recording
     The linear scores above time each spel by an *estimate* of reading time.
@@ -224,7 +223,7 @@
     first. When you are satisfied, the Export cell below uses the performed
     scores in `scores.json` in place of the linear ones.
   </script>
-  <script id="7002" type="module">
+  <script id="7" type="module">
     // THE CONTROLS: a recording, a Whisper model, and a button to
     // start. Listening is slow, so it only happens when the button is
     // pressed, never just because the file or the model changed.
@@ -252,7 +251,7 @@
 
     display(html`<div>${recordingLabel}${modelPicker}${transcribeButton}</div>`)
   </script>
-  <script id="7003" type="module">
+  <script id="8" type="module">
     // The number of times the button has been pressed (0 until the
     // first press). Cells that depend on this one run when the button
     // is pressed. They read the file and the model from the inputs
@@ -260,7 +259,7 @@
     // listen.
     const transcribeClicks = Generators.input(transcribeButton)
   </script>
-  <script id="7004" type="module">
+  <script id="9" type="module">
     // LISTENING: runs Whisper on the recording. Gives an array of the
     // words heard, in order:
     //   [{ text: "broad", start: 12.34, end: 12.71 }, ...]
@@ -329,7 +328,7 @@
       }
     })()
   </script>
-  <script id="7005" type="module">
+  <script id="10" type="module">
     // ALIGNING, part 1: the tools. The words heard are not exactly the
     // words of the galley (Whisper mishears, skips, adds). We line the
     // two lists of words up, allowing for that, with the classic
@@ -427,7 +426,7 @@
       return matches
     }
   </script>
-  <script id="7010" type="module">
+  <script id="11" type="module">
     // SNAPPING: Whisper's start time for the first word after a silence
     // is often too early: the word is stretched back over the silence,
     // to the end of the word before, so a line that follows a long
@@ -481,7 +480,7 @@
       return onset === null ? null : Math.max(start, onset * FRAME_S - LEAD_S)
     }
   </script>
-  <script id="7006" type="module">
+  <script id="12" type="module">
     // ALIGNING, part 2: the onset of every spel. Gives one row per
     // spel, in text order:
     //   { id, para, string, heard, onset (seconds),
@@ -562,7 +561,7 @@
       return rows
     })()
   </script>
-  <script id="7007" type="module">
+  <script id="13" type="module">
     // THE EDITOR: adjust the onsets one paragraph at a time.
     // onsetEditor(...) makes an element whose .value is an array of
     // onsets (seconds), one per spel in text order, and which sends an
@@ -728,13 +727,13 @@
       return root
     }
   </script>
-  <script id="7008" type="module">
+  <script id="14" type="module">
     // `onsets`: the onset in seconds of every spel, in text order, as
     // last adjusted above (null until something has been heard). Cells
     // that use it rerun whenever you change a number.
     const onsets = editor ? view(editor) : null
   </script>
-  <script id="7012" type="module">
+  <script id="15" type="module">
     // The editor element itself, made once per alignment. (Its own
     // cell, so that `onsets` above, which shows it, can rerun without
     // making a new one.) When it is replaced, stop and release its
@@ -747,7 +746,7 @@
       URL.revokeObjectURL(audio.src)
     })
   </script>
-  <script id="7009" type="module">
+  <script id="16" type="module">
     // THE PERFORMED SCORES, in the same shape as the linear `scores`:
     // one array of { id, duration } per para, `duration` in
     // milliseconds. The duration of a spel is the time to the next
@@ -779,7 +778,7 @@
         linearMs: scores[p][k].duration, performedMs: duration
       }))), { rows: 12 }))
   </script>
-  <script id="6003" type="module">
+  <script id="17" type="module">
     // Export: the files the player reads, in the shape its pages read
     // them. Save them into the poem's nbks/data/luzhai/, or download
     // them and move them there. config.json is the whole config
@@ -815,7 +814,19 @@
     }
     // The text of each file as it is written: identical to an existing
     // file's when the data are the same.
-    const texts = Object.fromEntries(Object.entries(piece).map(([name, data]) => [name, JSON.stringify(data)]))
+    // JSON with one record per line: each element of a top-level array,
+    // or each entry of a top-level object, on a line of its own and
+    // compact inside, so that the files diff by record. The same data
+    // always give the same text.
+    const toLines = (data) => {
+      const one = (value) => JSON.stringify(value)
+      if (Array.isArray(data) && data.length)
+        return "[\n" + data.map(one).join(",\n") + "\n]\n"
+      if (data && typeof data === "object" && !Array.isArray(data) && Object.keys(data).length)
+        return "{\n" + Object.entries(data).map(([key, value]) => `${one(key)}:${one(value)}`).join(",\n") + "\n}\n"
+      return one(data) + "\n"
+    }
+    const texts = Object.fromEntries(Object.entries(piece).map(([name, data]) => [name, toLines(data)]))
 
     // SAVING to the data folder. Where the browser allows it (Chrome,
     // Edge), pick this poem's nbks/data/luzhai/ once (it is
@@ -965,11 +976,11 @@
     display(saver())
     display(html`<p>Or download: ${links.flatMap((a, i) => (i ? [" · ", a] : [a]))}</p>`)
   </script>
-  <script id="2861" type="module">
+  <script id="18" type="module">
     const layout = mapParaSpels(spanned)
     const spels = layout.spels
   </script>
-  <script id="5875" type="module">
+  <script id="19" type="module">
     // paragraph name -> array of spel ids; names come from the markup
     // (para:name) or are para1, para2, ...
     const paras = layout.para
@@ -977,7 +988,7 @@
     // the shape the player's paras.json has
     const paraList = layout.order.para.map((name) => paras[name])
   </script>
-  <script id="16" type="text/html" pinned="" output="css">
+  <script id="20" type="text/html" pinned="" output="css">
     <style>
 
       /* config.fontFamily ('Source Serif 4') is loaded from Google
@@ -1042,12 +1053,12 @@
 
     </style>
   </script>
-  <script id="4309" type="text/markdown">
+  <script id="21" type="text/markdown">
     ---
     ### Machinery
     The cells below measure the galley and need no editing.
   </script>
-  <script id="582" type="module">
+  <script id="22" type="module">
     // `galley` tracks the element with id="galley" (defined in the
     // separate HTML cell). It emits only once the element exists, and
     // emits again whenever the HTML cell re-renders and produces a new
@@ -1064,7 +1075,7 @@
       invalidation.then(() => observer.disconnect());
     });
   </script>
-  <script id="4219" type="module">
+  <script id="23" type="module">
     // fonts must be loaded before anything is measured (see fontReady),
     // including the subsets that this galley's own characters need
     await fontReady
@@ -1077,7 +1088,7 @@
     // show the marked fonts in the galley itself, as the maker types it
     decorateGalley(galley, spanned.parsed)
   </script>
-  <script id="4401" type="module">
+  <script id="24" type="module">
     // Measures the spanned galley and groups its spels by the markup's
     // containment. Returns { text, spels: Map(id -> spel), order, para,
     // clmn, ofld, sctn, chpt } where each of the last five is { name:
@@ -1100,7 +1111,7 @@
       return { text: spanned.parsed.text, spels, order, ...groups };
     }
   </script>
-  <script id="844" type="module">
+  <script id="25" type="module">
     // Builds the array of spel objects from the output of addSpansTo():
     // { elem, parsed, cont }. leftvw/topvw/widthvw/heightvw are the
     // BOUNDING BOX of the spel's rendered span in vw, relative to its
@@ -1225,7 +1236,7 @@
       });
     }
   </script>
-  <script id="974" type="module">
+  <script id="26" type="module">
     // Wraps the text range [start, end) (character offsets into the
     // element's text, comments excluded, as parseMarkup counts them) in
     // <span class="spelm" data-i="i">. The range may cross element
@@ -1396,7 +1407,7 @@
       return { elem, parsed, cont };
     }
   </script>
-  <script id="5881" type="module">
+  <script id="27" type="module">
     // Markup syntax: <!--@ token token ... -->
     //   open:  kind or kind:name   e.g. para, clmn:left
     //   close: /kind               e.g. /para
@@ -1455,7 +1466,7 @@
       return { text, ...ents };
     }
   </script>
-  <script id="5890" type="module">
+  <script id="28" type="module">
     // Containment: for every spel (in parsed.spel order) the innermost
     // para, clmn, ofld, sctn, chpt and font whose range contains it,
     // or null (except para: see below). Unnamed entities are called
@@ -1484,12 +1495,12 @@
     // quotes, so it can sit inside a style="..." attribute.
     const fontCss = (name) => (name ? `'${fonts[name]}', serif` : "")
   </script>
-  <script id="1051" type="module">
+  <script id="29" type="module">
     // converts pixel measurements to the more flexible vw (viewport
     // width) measurement of css
     const pxToVw = (px) => px * (100 / vWidth)
   </script>
-  <script id="5514" type="module">
+  <script id="30" type="module">
     // The width in px of 100vw, asked of the browser itself (a probe
     // element 100vw wide), so it is exactly what css vw means here,
     // scrollbar and zoom included. It is read once: everything in the
@@ -1504,7 +1515,7 @@
       return w;
     })()
   </script>
-  <script id="5894" type="module">
+  <script id="31" type="module">
     // The font comes from Google Fonts (network), not from a local()
     // copy, so that everyone's measurements, and the player's, use the
     // same font file. `fontReady` resolves once the stylesheet and the

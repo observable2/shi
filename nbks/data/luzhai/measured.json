@@ -1,1 +1,9 @@
-{"fontFamily":"Source Serif 4","fontWeight":300,"fontSizeVw":2.5,"lineHeight":1.5,"opsz":14,"ligatures":"no-common-ligatures","clmnRight":20}
+{
+"fontFamily":"Source Serif 4",
+"fontWeight":300,
+"fontSizeVw":2.5,
+"lineHeight":1.5,
+"opsz":14,
+"ligatures":"no-common-ligatures",
+"clmnRight":20
+}
