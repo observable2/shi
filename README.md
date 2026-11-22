@@ -50,7 +50,10 @@ cell, set the `config` cell, optionally align a recording (the
 performance cells), then save the files from the Export cell into
 `nbks/data/luzhai/`: `spels.json`, `paras.json`, `scores.json`,
 `scores-timeToRead.json`, `config.json`, `measured.json` (and
-`onsets.json` if a recording was aligned). `luzhai.html` reads them with
+`onsets.json` if a recording was aligned). `spels-raw.json` is a copy of
+`spels.json` as measured, kept for when `spels.json` is edited by hand
+(`diff spels-raw.json spels.json`); the folder check does not select a
+`spels.json` that differs from it. `luzhai.html` reads them with
 `createConfig`, so the player cannot disagree with the notebook.
 
 `nbks/data/luzhai/` starts with **placeholder** data (a four-line
