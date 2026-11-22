@@ -25,6 +25,6 @@
 "lineHeight":1.5,
 "opsz":14,
 "ligatures":"no-common-ligatures",
-"clmnRight":20,
+"clmnRight":35,
 "fadeOut":"score"
 }
