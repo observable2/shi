@@ -5,7 +5,7 @@
     # Scoring Luzhai
     #### *Luzhai*, translated by John Cayley
     Working notebook for this poem, made from the Scoring Template
-    (version 1.1.0). Enter the translation, with its markup, in the
+    (version 1.2.0). Enter the translation, with its markup, in the
     `galley` cell and set the configuration in the `config` cell.
     Then save the data files from the Export cell into
     `nbks/data/luzhai/` (it asks before replacing a file; or download
@@ -116,26 +116,24 @@
     // }
     const perScore = {}
     // Fonts for marked spels. In the galley, <!--@ font:cursive -->
-    // ... <!--@ /font --> sets the family of every spel inside it,
-    // for measuring and in the exported spels. The name on the left
-    // is the one used in the markup; the family on the right is
-    // loaded from Google Fonts by custom.tmpl.
+    // ... <!--@ /font --> sets the font of every spel inside it, for
+    // measuring and in the exported spels. The name on the left is the
+    // one used in the markup. On the right: a family (loaded from
+    // Google Fonts by custom.tmpl), or { family, sizeVw } to give the
+    // spels a font size too, in vw. Without sizeVw they keep the size
+    // of the rest (fontSizeVw above).
     const fonts = {
-      cursive: "Liu Jian Mao Cao",
+      cursive: { family: "Liu Jian Mao Cao", sizeVw: 5 },
     }
   </script>
   <script id="2" type="text/html" pinned="">
-    <div id="galley" class="set"><!--@ ofld clmn:left font:cursive -->景空
-    入山
-    深不
-    林见
-    复人
-    照但
-    青闻
-    苔人
-    上语
-        响
-        返
+    <div id="galley" class="set"><!--@ ofld clmn:left font:cursive -->林人空
+    复语山
+    照响不
+    青返见
+    苔景人
+    上入但
+       深闻
     <!--@ /font /clmn clmn:right -->Am I alone ?
     I seem to hear your voice …
          — or echo ?
@@ -1082,7 +1080,7 @@
     await Promise.all(faces.map((f) =>
       document.fonts.load(`${f}16px "${fontFamily}"`, galley.textContent)))
     // and the marked fonts (custom.tmpl links their stylesheets)
-    await Promise.all(Object.values(fonts).map((family) =>
+    await Promise.all(fontFamilies().map((family) =>
       document.fonts.load(`16px "${family}"`, galley.textContent)))
     const spanned = addSpansTo(galley)
     // show the marked fonts in the galley itself, as the maker types it
@@ -1202,8 +1200,8 @@
       const inners = Array.from(elem.querySelectorAll("span.spelm"), (s) => {
         let inner = s.innerHTML.replace(comments, "");
         for (let a = s.parentElement; a && a !== elem; a = a.parentElement) {
-          // display wrapper, not the spel's markup
-          if (a.classList.contains("clmn-lift")) continue;
+          // display wrappers, not the spel's markup
+          if (a.classList.contains("clmn-lift") || a.classList.contains("galley-font")) continue;
           const tag = a.cloneNode(false).outerHTML;
           inner = tag.slice(0, tag.lastIndexOf("</")) + inner + tag.slice(tag.lastIndexOf("</"));
         }
@@ -1231,7 +1229,7 @@
           id, index: i, string: s.text, start: s.start, end: s.end, implicit: !!s.implicit,
           para: s.para, clmn: s.clmn, ofld: s.ofld, sctn: s.sctn, chpt: s.chpt, font: s.font,
           leftvw, topvw, widthvw: r3(pxToVw(m.width)), heightvw: r3(pxToVw(m.height)), indentvw,
-          html: `<span id="${attr}" class="spel" style="left:${leftvw}vw;top:${topvw}vw;white-space:pre${indentvw ? `;text-indent:${indentvw}vw` : ""}${s.font ? `;font-family:${fontCss(s.font)}` : ""}">${inner}</span>`
+          html: `<span id="${attr}" class="spel" style="left:${leftvw}vw;top:${topvw}vw;white-space:pre${indentvw ? `;text-indent:${indentvw}vw` : ""}${s.font ? `;${fontCss(s.font)}` : ""}">${inner}</span>`
         };
       });
     }
@@ -1326,7 +1324,7 @@
       for (const e of parsed.font) {
         const wrapper = document.createElement("span");
         wrapper.className = "galley-font";
-        wrapper.style.fontFamily = fontCss(e.name);
+        wrapper.style.cssText = fontCss(e.name);
         wrapRange(galleyElem, e.start, e.end, wrapper);
       }
     };
@@ -1356,9 +1354,11 @@
       const cont = containment(parsed);
       const elem = galleyElem.cloneNode(true);
       elem.removeAttribute("id");
-      // the display wrappers of decorateGalley are not part of the
-      // galley: take them out of the copy that is measured
-      unwrapFonts(elem);
+      // Wrap the font regions in the copy, whitespace included, as in
+      // the galley as displayed: the space around a spel is in the
+      // region's font too, and moves the spel accordingly. (The
+      // wrappers are display only: getSpelArray leaves them out.)
+      decorateGalley(elem, parsed);
       // rules first: they only split text nodes, never change the text
       parsed.ofld.filter((o) => parsed.spel.length && o.start > parsed.spel[0].start).forEach((o) => {
         const hr = document.createElement("hr");
@@ -1367,9 +1367,7 @@
       });
       parsed.spel.forEach((s, i) => {
         const shift = clmnOffset(cont[i].clmn);
-        const family = fontCss(cont[i].font);
-        const style = [shift ? `position:relative;left:${shift}vw` : "", family ? `font-family:${family}` : ""];
-        wrapSpel(elem, s.start, s.end, i, style.filter(Boolean).join(";"));
+        wrapSpel(elem, s.start, s.end, i, shift ? `position:relative;left:${shift}vw` : "");
       });
       // a new clmn resets the top, as a new ofld does: measure the
       // unshifted text, then lift each clmn by the distance between its
@@ -1486,14 +1484,24 @@
         // para
         c.para ??= c.ofld ?? "galley";
         if (c.font !== null && !(c.font in fonts))
-          throw new Error(`Unknown font "${c.font}" in the markup (fonts: ${Object.keys(fonts).join(", ")})`);
+          throw new Error(`Unknown font "${c.font}" in the markup (fonts: ${Object.keys(fonts).join(", ") || "none"})`);
         return c;
       });
     }
 
-    // The CSS font-family value of a font name ("" for none). Single
-    // quotes, so it can sit inside a style="..." attribute.
-    const fontCss = (name) => (name ? `'${fonts[name]}', serif` : "")
+    // An entry of `fonts` as { family, sizeVw }: a plain string is a
+    // family with no size of its own.
+    const fontEntry = (name) => (typeof fonts[name] === "string" ? { family: fonts[name] } : fonts[name])
+    const fontFamilies = () => Object.keys(fonts).map((name) => fontEntry(name).family)
+
+    // The CSS declarations of a font name ("" for none): its family and
+    // its size, if it has one. Single quotes, so it can sit inside a
+    // style="..." attribute.
+    const fontCss = (name) => {
+      if (!name) return ""
+      const { family, sizeVw } = fontEntry(name)
+      return `font-family:'${family}', serif` + (sizeVw ? `;font-size:${sizeVw}vw` : "")
+    }
   </script>
   <script id="29" type="module">
     // converts pixel measurements to the more flexible vw (viewport

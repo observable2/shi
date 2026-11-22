@@ -65,8 +65,12 @@ is a spel of its own (with the punctuation after it), so a line of
 characters is animated character by character. Spels can use the
 Google font Liu Jian Mao Cao: wrap them in
 `<!--@ font:cursive --> ... <!--@ /font -->` in the galley (the names
-are in the `fonts` table in the `config` cell). The notebook measures
-them in that font, and the exported spels carry it in their `html`.
+are in the `fonts` table in the `config` cell). An entry is a family,
+or `{ family, sizeVw }` to give those spels their own font size in vw
+(the rest keep `fontSizeVw`). The notebook measures them in that font
+and size, and the exported spels carry both in their `html`. The
+spaces inside a region are in its font too, so an indent is measured as
+the galley shows it.
 `custom.tmpl` links the font from Google Fonts for every page in this
 project; the browser fetches only the slices of characters used.
 
